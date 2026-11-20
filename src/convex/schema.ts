@@ -1,6 +1,16 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { Infer, v } from "convex/values";
+import {
+  badgeValidator,
+  bookingStatusValidator,
+  categoryValidator,
+  colorValidator,
+  kindValidator,
+  orderStatusValidator,
+  paymentMethodValidator,
+  postStatusValidator,
+} from "./validators";
 
 // default user roles. can add / remove based on the project as needed
 export const ROLES = {
@@ -32,12 +42,113 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    products: defineTable({
+      slug: v.string(),
+      name: v.string(),
+      category: categoryValidator,
+      kind: kindValidator,
+      description: v.string(),
+      fabric: v.string(),
+      price: v.number(),
+      discount: v.number(),
+      sizes: v.array(v.string()),
+      colors: v.array(colorValidator),
+      tone: v.string(),
+      badge: v.optional(badgeValidator),
+      inStock: v.boolean(),
+      keywords: v.array(v.string()),
+      position: v.number(),
+    })
+      .index("by_slug", ["slug"])
+      .index("by_position", ["position"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    orders: defineTable({
+      code: v.string(),
+      userId: v.optional(v.id("users")),
+      customerName: v.string(),
+      phone: v.string(),
+      address: v.string(),
+      notes: v.optional(v.string()),
+      payment: v.string(),
+      paymentId: v.string(),
+      items: v.array(
+        v.object({
+          slug: v.string(),
+          name: v.string(),
+          size: v.string(),
+          color: v.string(),
+          qty: v.number(),
+          unitPrice: v.number(),
+        }),
+      ),
+      total: v.number(),
+      status: orderStatusValidator,
+      createdAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_created", ["createdAt"]),
+
+    reviews: defineTable({
+      productSlug: v.string(),
+      userId: v.optional(v.id("users")),
+      authorName: v.string(),
+      rating: v.number(),
+      text: v.string(),
+      approved: v.boolean(),
+      createdAt: v.number(),
+    })
+      .index("by_product", ["productSlug", "approved"])
+      .index("by_user", ["userId"])
+      .index("by_approved", ["approved"]),
+
+    bookings: defineTable({
+      userId: v.optional(v.id("users")),
+      name: v.string(),
+      phone: v.string(),
+      service: v.string(),
+      date: v.string(),
+      time: v.string(),
+      notes: v.optional(v.string()),
+      status: bookingStatusValidator,
+      createdAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_date", ["date"]),
+
+    posts: defineTable({
+      userId: v.optional(v.id("users")),
+      authorName: v.string(),
+      caption: v.string(),
+      imageId: v.optional(v.id("_storage")),
+      imageUrl: v.optional(v.string()),
+      status: postStatusValidator,
+      createdAt: v.number(),
+    })
+      .index("by_status", ["status"])
+      .index("by_user", ["userId"]),
+
+    settings: defineTable({
+      key: v.string(),
+      storeName: v.string(),
+      tagline: v.string(),
+      announcement: v.array(v.string()),
+      whatsapp: v.string(),
+      phoneDisplay: v.string(),
+      email: v.string(),
+      city: v.string(),
+      paymentMethods: v.array(paymentMethodValidator),
+      footerCredit: v.string(),
+      footerCreditUrl: v.string(),
+      adminEmail: v.string(),
+      adminPassword: v.string(),
+      updatedAt: v.number(),
+    }).index("by_key", ["key"]),
+
+    adminSessions: defineTable({
+      token: v.string(),
+      createdAt: v.number(),
+      expiresAt: v.number(),
+    }).index("by_token", ["token"]),
   },
   {
     schemaValidation: false,

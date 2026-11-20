@@ -129,7 +129,55 @@ export function cartTotal(lines: CartLine[], products: Product[]) {
 }
 
 export function whatsappLink(message: string, phone: string) {
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${phone.replace(/[^\d]/g, "")}?text=${encodeURIComponent(message)}`;
+}
+
+export const ORDER_STATUS_LABELS: Record<string, string> = {
+  new: "طلب جديد",
+  confirmed: "مؤكد",
+  shipped: "تم الشحن",
+  delivered: "تم التسليم",
+  cancelled: "ملغي",
+};
+
+export const BOOKING_STATUS_LABELS: Record<string, string> = {
+  pending: "بانتظار التأكيد",
+  confirmed: "مؤكد",
+  completed: "مكتمل",
+  cancelled: "ملغي",
+};
+
+export const POST_STATUS_LABELS: Record<string, string> = {
+  pending: "بانتظار المراجعة",
+  approved: "منشور",
+  rejected: "مرفوض",
+};
+
+export function formatDate(timestamp: number) {
+  return new Intl.DateTimeFormat("ar-EG", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(timestamp));
+}
+
+export function formatDateTime(timestamp: number) {
+  return new Intl.DateTimeFormat("ar-EG", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(timestamp));
+}
+
+export function formatBookingDate(date: string) {
+  const parsed = new Date(`${date}T12:00:00`);
+  if (Number.isNaN(parsed.getTime())) return date;
+  return new Intl.DateTimeFormat("ar-EG", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(parsed);
 }
 
 export type Customer = {
@@ -145,11 +193,13 @@ export function buildOrderMessage({
   products,
   customer,
   storeName,
+  code,
 }: {
   lines: CartLine[];
   products: Product[];
   customer: Customer;
   storeName: string;
+  code?: string;
 }) {
   const rows = lines.map((line, index) => {
     const product = products.find((item) => item.id === line.productId);
@@ -162,7 +212,8 @@ export function buildOrderMessage({
   const total = cartTotal(lines, products);
 
   return [
-    `✦ طلب جديد من ${storeName} ✦`,
+    `طلب جديد — ${storeName}`,
+    code ? `رقم الطلب: ${code}` : "",
     "--------------------------------",
     ...rows.filter(Boolean),
     "--------------------------------",

@@ -434,36 +434,71 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+export type PaymentMethod = {
+  id: string;
+  label: string;
+  note: string;
+  enabled: boolean;
+};
+
+export type StoreSettings = {
+  storeName: string;
+  tagline: string;
+  announcement: string[];
+  whatsapp: string;
+  phoneDisplay: string;
+  email: string;
+  city: string;
+  paymentMethods: PaymentMethod[];
+  footerCredit: string;
+  footerCreditUrl: string;
+};
+
 export const STORE = {
   name: "Zoma store",
   nameArabic: "زومة",
-  tagline: "بيت الأزياء الرجالية",
+  tagline: "ملابس رجالية مختارة بعناية",
   city: "القاهرة · مصر",
   currency: "ج.م",
   whatsapp: "201036038971",
   phoneDisplay: "+20 103 603 8971",
   phoneHref: "tel:+201036038971",
+  email: "ye360057@gmail.com",
   instapay: "01036038971",
   announcement: [
-    "عروض الشتاء الحصرية — خصومات تصل إلى ٥٠٪ على البدلات والبليزرات",
-    "توصيل مجاني للطلبات فوق ٥٠٠٠ جنيه داخل القاهرة والجيزة",
-    "تفصيل يدوي وأقمشة مستوردة · استبدال خلال ١٤ يوماً",
-    "اطلب الآن عبر واتساب: +20 103 603 8971",
+    "توصيل لكل محافظات مصر — تجهيز الطلبات خلال ٢٤ ساعة",
+    "جلسات قياس شخصية مجاناً في استوديو القاهرة",
+    "الدفع عند الاستلام أو تحويل إنستاباي — بدون رسوم إضافية",
+    "قطع محدودة من كل تصميم · استبدال خلال ١٤ يوماً",
   ],
   paymentMethods: [
     {
       id: "cod",
       label: "الدفع عند الاستلام",
       note: "تستلم قطعتك وتدفع نقداً للمندوب. متاح في كل محافظات مصر.",
+      enabled: true,
     },
     {
       id: "instapay",
       label: "تحويل إنستاباي",
       note: "حوّل المبلغ على رقم إنستاباي 01036038971 ثم أرسل صورة الإيصال على واتساب +20 103 603 8971.",
+      enabled: true,
     },
   ],
-  developerCredit: {
-    text: "تصميم وتطوير: يوسف المصري | للتواصل واتساب: +201221736903",
-    whatsapp: "201221736903",
-  },
+  footerCredit:
+    "تصميم وتطوير: يوسف المصري | للتواصل واتساب: +201221736903",
+  footerCreditUrl: "https://wa.me/201221736903",
+};
+
+export const DEFAULT_SETTINGS: StoreSettings = {
+  storeName: STORE.name,
+  tagline: STORE.tagline,
+  announcement: STORE.announcement,
+  whatsapp: STORE.whatsapp,
+  phoneDisplay: STORE.phoneDisplay,
+  email: STORE.email,
+  city: STORE.city,
+  paymentMethods: STORE.paymentMethods,
+  footerCredit: STORE.footerCredit,
+  footerCreditUrl: STORE.footerCreditUrl,
 };

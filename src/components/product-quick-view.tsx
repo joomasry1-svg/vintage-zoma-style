@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import type { Product } from "@/data/store";
-import { STORE } from "@/data/store";
+import { useStore } from "@/context/store-context";
 import {
   categoryLabel,
   formatPrice,
@@ -14,15 +15,16 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   Check,
   Maximize2,
   MessageCircle,
   Minus,
+  Plus,
   ShieldCheck,
   Truck,
+  X,
 } from "lucide-react";
 
 export function ProductQuickView({
@@ -32,8 +34,14 @@ export function ProductQuickView({
 }: {
   product: Product | null;
   onClose: () => void;
-  onAdd: (item: { product: Product; size: string; color: string; qty: number }) => void;
+  onAdd: (item: {
+    product: Product;
+    size: string;
+    color: string;
+    qty: number;
+  }) => void;
 }) {
+  const { settings } = useStore();
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
@@ -54,9 +62,20 @@ export function ProductQuickView({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[92vh] w-[calc(100%-1.5rem)] max-w-4xl overflow-y-auto border-ink/20 bg-paper p-0 shadow-2xl sm:max-w-4xl">
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[92vh] w-[calc(100%-1.5rem)] max-w-4xl overflow-y-auto rounded-none border-ink/15 bg-card p-0 shadow-2xl sm:max-w-4xl"
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="إغلاق"
+          className="absolute top-3 start-3 z-20 flex size-8 items-center justify-center border border-ink/20 bg-paper/95 text-ink transition-colors hover:border-ink/50"
+        >
+          <X className="size-4" />
+        </button>
         <div className="grid gap-0 md:grid-cols-2">
-          <div className="relative border-b border-ink/12 md:border-b-0 md:border-e">
+          <div className="relative border-b border-ink/10 md:border-b-0 md:border-e">
             <div className="relative overflow-hidden">
               <ProductPlate
                 kind={product.kind}
@@ -67,63 +86,66 @@ export function ProductQuickView({
                   zoom && "scale-[1.75]",
                 )}
               >
-                <span className="absolute bottom-4 start-4 text-[8px] tracking-[0.34em] text-ink/35">
-                  ZOMA · ARCHIVE PLATE
+                <span className="mono absolute bottom-4 start-4 text-[7px] tracking-[0.2em] text-[#211c17]/40">
+                  ZOMA ARCHIVE PLATE
                 </span>
               </ProductPlate>
               <button
                 type="button"
                 onClick={() => setZoom((current) => !current)}
-                className="absolute bottom-3 end-3 flex items-center gap-1.5 border border-ink/25 bg-paper/90 px-2.5 py-1.5 text-[10px] tracking-wide text-ink transition-colors hover:bg-ink hover:text-paper"
+                className="absolute bottom-3 end-3 flex items-center gap-1.5 border border-[#211c17]/20 bg-stage/90 px-2.5 py-1.5 text-[9px] text-[#211c17] transition-colors hover:bg-[#211c17] hover:text-stage"
               >
                 <Maximize2 className="size-3" />
-                {zoom ? "تصغير" : "تكبير القماش"}
+                {zoom ? "تصغير" : "تكبير"}
               </button>
             </div>
           </div>
 
           <div className="flex flex-col p-6 sm:p-8">
-            <p className="text-[10px] tracking-[0.28em] text-sepia">
-              {categoryLabel(product.category)}
-            </p>
-            <DialogTitle className="mt-2 font-display text-3xl leading-snug text-ink">
+            <div className="flex items-center justify-between gap-2">
+              <p className="mono text-[9px] tracking-[0.18em] text-gold">
+                QUICK VIEW / {product.kind.toUpperCase()}
+              </p>
+              <p className="text-[10px] text-ink-soft/50">
+                {categoryLabel(product.category)}
+              </p>
+            </div>
+            <DialogTitle className="mt-2 text-2xl font-semibold leading-snug text-ink">
               {product.name}
             </DialogTitle>
             <DialogDescription className="sr-only">
               تفاصيل {product.name} واختيار المقاس واللون
             </DialogDescription>
 
-            <div className="mt-4 flex flex-wrap items-end gap-3 border-b border-ink/12 pb-5">
-              <span className="font-display text-3xl text-ink tabular">
+            <div className="mt-4 flex flex-wrap items-end gap-3 border-b border-ink/10 pb-5">
+              <span className="mono text-2xl text-ink">
                 {formatPrice(finalPrice)}
               </span>
               {product.discount > 0 && (
                 <>
-                  <span className="price-strike pb-1 text-sm text-muted-foreground tabular">
+                  <span className="price-strike mono pb-1 text-[11px] text-ink-soft/40">
                     {formatPrice(product.price)}
                   </span>
-                  <span className="mb-1 border border-gold/50 bg-gold/10 px-2 py-0.5 text-[10px] font-semibold text-sepia">
-                    وفّر {product.discount}%
+                  <span className="mono mb-1 bg-gold px-2 py-0.5 text-[9px] font-medium text-espresso">
+                    -{product.discount}%
                   </span>
                 </>
               )}
             </div>
 
-            <p className="mt-4 text-[13px] leading-7 text-ink-soft">
+            <p className="mt-4 text-[12.5px] leading-7 text-ink-soft/75">
               {product.description}
             </p>
 
-            <p className="mt-3 text-[11px] text-muted-foreground">
-              <span className="text-sepia">القماش:</span> {product.fabric}
+            <p className="mt-3 text-[10.5px] text-ink-soft/50">
+              <span className="text-gold">القماش:</span> {product.fabric}
             </p>
 
             <div className="mt-5">
               <div className="flex items-baseline justify-between">
-                <p className="text-[11px] font-semibold tracking-[0.16em] text-ink">
-                  المقاس
-                </p>
-                <span className="text-[10px] text-muted-foreground">
-                  دليل المقاسات متاح عبر واتساب
+                <p className="text-[11px] font-medium text-ink">المقاس</p>
+                <span className="text-[9px] text-ink-soft/40">
+                  دليل المقاسات على واتساب
                 </span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -133,10 +155,10 @@ export function ProductQuickView({
                     type="button"
                     onClick={() => setSize(option)}
                     className={cn(
-                      "min-w-11 border px-3 py-2 text-xs transition-colors",
+                      "mono min-w-11 border px-3 py-2 text-[11px] transition-colors",
                       size === option
-                        ? "border-ink bg-ink text-paper"
-                        : "border-ink/20 bg-paper/60 text-ink hover:border-ink/60",
+                        ? "border-gold bg-gold text-espresso"
+                        : "border-ink/20 text-ink hover:border-ink/50",
                     )}
                   >
                     {option}
@@ -146,7 +168,7 @@ export function ProductQuickView({
             </div>
 
             <div className="mt-5">
-              <p className="text-[11px] font-semibold tracking-[0.16em] text-ink">
+              <p className="text-[11px] font-medium text-ink">
                 اللون {activeColor ? `— ${activeColor.name}` : ""}
               </p>
               <div className="mt-2 flex flex-wrap gap-2.5">
@@ -160,15 +182,20 @@ export function ProductQuickView({
                     className={cn(
                       "flex size-8 items-center justify-center rounded-full border transition-all",
                       color === option.name
-                        ? "border-ink ring-1 ring-ink ring-offset-2 ring-offset-paper"
-                        : "border-ink/25 hover:border-ink/60",
+                        ? "border-gold ring-1 ring-gold ring-offset-2 ring-offset-card"
+                        : "border-ink/20 hover:border-ink/50",
                     )}
                     style={{ backgroundColor: option.hex }}
                   >
                     {color === option.name && (
                       <Check
                         className="size-3.5"
-                        style={{ color: option.hex === "#f2ebdc" ? "#211c17" : "#f4ecdd" }}
+                        style={{
+                          color:
+                            option.hex.toLowerCase() === "#f2ebdc"
+                              ? "#211c17"
+                              : "#f4f3ec",
+                        }}
                       />
                     )}
                   </button>
@@ -177,7 +204,7 @@ export function ProductQuickView({
             </div>
 
             <div className="mt-5 flex items-center gap-4">
-              <div className="flex items-center border border-ink/20">
+              <div className="flex items-center border border-ink/15">
                 <button
                   type="button"
                   onClick={() => setQty((current) => Math.max(1, current - 1))}
@@ -186,20 +213,20 @@ export function ProductQuickView({
                 >
                   <Minus className="size-3.5" />
                 </button>
-                <span className="w-8 text-center text-sm tabular">{qty}</span>
+                <span className="mono w-8 text-center text-[12px]">{qty}</span>
                 <button
                   type="button"
                   onClick={() => setQty((current) => Math.min(9, current + 1))}
                   className="px-3 py-2.5 text-ink transition-colors hover:bg-ink/5"
                   aria-label="زيادة الكمية"
                 >
-                  <PlusGlyph />
+                  <Plus className="size-3.5" />
                 </button>
               </div>
               <span
                 className={cn(
-                  "text-[11px]",
-                  product.inStock ? "text-ink-soft" : "text-destructive",
+                  "text-[10px]",
+                  product.inStock ? "text-ink-soft/60" : "text-destructive",
                 )}
               >
                 {product.inStock
@@ -209,35 +236,43 @@ export function ProductQuickView({
             </div>
 
             <div className="mt-6 flex flex-col gap-2">
-              <Button
+              <button
                 type="button"
                 onClick={() => onAdd({ product, size, color, qty })}
                 disabled={!size || !color || !product.inStock}
-                className="h-12 w-full rounded-none bg-ink text-xs tracking-[0.18em] text-paper hover:bg-espresso"
+                className="h-12 w-full bg-gold text-[11px] font-semibold tracking-[0.1em] text-espresso transition-opacity hover:opacity-90 disabled:opacity-40"
               >
                 أضف إلى الحقيبة
-              </Button>
-              <a
-                href={whatsappLink(
-                  `مرحباً ${STORE.name}، أريد الاستفسار عن: ${product.name}`,
-                  STORE.whatsapp,
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-11 w-full items-center justify-center gap-2 border border-ink/25 text-[11px] tracking-[0.12em] text-ink transition-colors hover:border-ink/60 hover:bg-ink/5"
-              >
-                <MessageCircle className="size-4" />
-                اسأل عن القطعة على واتساب
-              </a>
+              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={whatsappLink(
+                    `مرحباً ${settings.storeName}، أريد الاستفسار عن: ${product.name}`,
+                    settings.whatsapp,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-10 items-center justify-center gap-1.5 border border-ink/15 text-[10px] text-ink transition-colors hover:border-ink/40"
+                >
+                  <MessageCircle className="size-3.5 text-gold" />
+                  اسأل على واتساب
+                </a>
+                <Link
+                  to={`/product/${product.id}`}
+                  className="flex h-10 items-center justify-center border border-ink/15 text-[10px] text-ink transition-colors hover:border-ink/40"
+                >
+                  كل التفاصيل
+                </Link>
+              </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3 border-t border-ink/10 pt-4 text-[10px] text-muted-foreground">
+            <div className="mt-5 grid grid-cols-2 gap-3 border-t border-ink/10 pt-4 text-[9.5px] text-ink-soft/50">
               <span className="flex items-center gap-2">
-                <Truck className="size-3.5 text-sepia" />
+                <Truck className="size-3.5 text-ink-soft/40" />
                 توصيل لكل المحافظات
               </span>
               <span className="flex items-center gap-2">
-                <ShieldCheck className="size-3.5 text-sepia" />
+                <ShieldCheck className="size-3.5 text-ink-soft/40" />
                 استبدال خلال ١٤ يوماً
               </span>
             </div>
@@ -245,13 +280,5 @@ export function ProductQuickView({
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function PlusGlyph() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
   );
 }

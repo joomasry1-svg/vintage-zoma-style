@@ -1,11 +1,11 @@
 {
-  "name": "Zoma store — أزياء رجالية فاخرة",
+  "name": "Zoma store — ملابس رجالية مختارة",
   "short_name": "Zoma store",
-  "description": "بدلات وقمصان وأحذية رجالية مختارة بعناية — طلب مباشر عبر واتساب.",
+  "description": "تسوّق البدلات والقمصان والأحذية، احجز جلسة قياس، واطلب عبر واتساب.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f4ecdd",
-  "theme_color": "#241d16",
+  "background_color": "#0a0b0d",
+  "theme_color": "#0a0b0d",
   "icons": [
     {
       "src": "/logo.svg",

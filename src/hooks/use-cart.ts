@@ -84,6 +84,7 @@ export function useCart() {
     lines,
     count: lines.reduce((total, line) => total + line.qty, 0),
     isOpen,
+    setIsOpen,
     openCart: () => setIsOpen(true),
     closeCart: () => setIsOpen(false),
     addItem,

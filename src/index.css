@@ -41,7 +41,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Zoma vintage palette */
+  /* Zoma technical palette */
   --color-paper: var(--paper);
   --color-paper-deep: var(--paper-deep);
   --color-ink: var(--ink);
@@ -50,42 +50,48 @@
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
   --color-espresso: var(--espresso);
-  --font-display: "Amiri", "Times New Roman", serif;
-  --font-body: "Cairo", ui-sans-serif, system-ui, sans-serif;
-  --font-latin: "Cormorant Garamond", "Times New Roman", serif;
+  --color-stage: var(--stage);
+  --color-signal-blue: var(--signal-blue);
+  --color-signal-orange: var(--signal-orange);
+  --font-display: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-latin: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 /* CHANGE VALUES FOR THEME */
 :root {
-  /* Vintage: aged paper, ink, sepia and muted gold */
-  --paper: #f4ecdd;
-  --paper-deep: #e9dcc5;
-  --ink: #211c17;
-  --ink-soft: #51473a;
-  --sepia: #8a7050;
-  --gold: #a9884f;
-  --gold-soft: #cbb387;
-  --espresso: #241d16;
+  /* Dark technical boutique: ink canvas, bone text, signal lime */
+  --paper: #0a0b0d;
+  --paper-deep: #14161a;
+  --ink: #f4f3ec;
+  --ink-soft: #b9bcb3;
+  --sepia: #9aa096;
+  --gold: #d9ff57;
+  --gold-soft: #b7d84a;
+  --espresso: #060708;
+  --stage: #efe9dc;
+  --signal-blue: #84a9ff;
+  --signal-orange: #ff8a5c;
 
-  --radius: 0.25rem;
-  --background: #f4ecdd;
-  --foreground: #211c17;
-  --card: #f8f2e6;
-  --card-foreground: #211c17;
-  --popover: #f8f2e6;
-  --popover-foreground: #211c17;
-  --primary: #211c17;
-  --primary-foreground: #f7f0e2;
-  --secondary: #e9dcc5;
-  --secondary-foreground: #211c17;
-  --muted: #ece2cf;
-  --muted-foreground: #6d6152;
-  --accent: #efe2c9;
-  --accent-foreground: #211c17;
-  --destructive: #8d3a2b;
-  --border: #d8c9b0;
-  --input: #d8c9b0;
-  --ring: #a9884f;
+  --radius: 0.125rem;
+  --background: #0a0b0d;
+  --foreground: #f4f3ec;
+  --card: #121417;
+  --card-foreground: #f4f3ec;
+  --popover: #121417;
+  --popover-foreground: #f4f3ec;
+  --primary: #d9ff57;
+  --primary-foreground: #0a0b0d;
+  --secondary: #1b1e21;
+  --secondary-foreground: #f4f3ec;
+  --muted: #171a1d;
+  --muted-foreground: #8f958c;
+  --accent: #1f2326;
+  --accent-foreground: #f4f3ec;
+  --destructive: #ff6b5e;
+  --border: #26292c;
+  --input: #2a2d31;
+  --ring: #d9ff57;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -152,11 +158,12 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
   ::selection {
-    background: var(--gold-soft);
-    color: var(--ink);
+    background: var(--gold);
+    color: #0a0b0d;
   }
   button:not([disabled]),
   [role="button"]:not([disabled]) {
@@ -164,24 +171,44 @@
   }
 }
 
-/* ---------- Vintage texture layer ---------- */
+/* ---------- Surface + texture layers ---------- */
 .grain-overlay {
   position: fixed;
   inset: 0;
   z-index: 90;
   pointer-events: none;
-  opacity: 0.42;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+  opacity: 0.3;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.2'/%3E%3C/svg%3E");
   background-size: 180px 180px;
 }
 
-.paper-texture {
+.canvas-dark {
   background-color: var(--paper);
   background-image:
-    radial-gradient(120% 80% at 12% 0%, rgba(255, 252, 244, 0.85), transparent 60%),
-    radial-gradient(90% 70% at 100% 100%, rgba(169, 136, 79, 0.14), transparent 65%),
-    repeating-linear-gradient(0deg, rgba(33, 28, 23, 0.025) 0px, rgba(33, 28, 23, 0.025) 1px, transparent 1px, transparent 4px);
+    radial-gradient(90% 55% at 78% 0%, rgba(217, 255, 87, 0.055), transparent 65%),
+    radial-gradient(70% 50% at 0% 30%, rgba(132, 169, 255, 0.05), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: auto, auto, 96px 96px, 96px 96px;
+}
+
+.paper-texture {
+  background-color: var(--stage);
+  background-image:
+    radial-gradient(120% 80% at 12% 0%, rgba(255, 252, 244, 0.9), transparent 60%),
+    radial-gradient(90% 70% at 100% 100%, rgba(120, 98, 60, 0.16), transparent 65%),
+    repeating-linear-gradient(0deg, rgba(33, 28, 23, 0.03) 0px, rgba(33, 28, 23, 0.03) 1px, transparent 1px, transparent 4px);
+}
+
+.surface-panel {
+  background-color: var(--paper-deep);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.mono {
+  font-family: var(--font-latin);
+  font-variant-numeric: tabular-nums;
 }
 
 .hide-scrollbar {
@@ -239,18 +266,30 @@
   animation: drift 13s ease-in-out infinite;
 }
 
-/* ---------- Editorial details ---------- */
+/* ---------- Technical details ---------- */
 .eyebrow {
-  font-size: 0.68rem;
-  letter-spacing: 0.34em;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--sepia);
+}
+
+.signal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--gold);
+  color: #0a0b0d;
+  font-family: var(--font-latin);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  padding: 0.3rem 0.55rem;
 }
 
 .gold-rule {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--gold) 25%, var(--gold) 75%, transparent);
-  opacity: 0.55;
+  opacity: 0.35;
 }
 
 .plate-frame {
@@ -260,7 +299,7 @@
 .price-strike {
   text-decoration: line-through;
   text-decoration-thickness: 1px;
-  text-decoration-color: rgba(33, 28, 23, 0.55);
+  text-decoration-color: rgba(244, 243, 236, 0.45);
 }
 
 /* RTL-aware numeric alignment */

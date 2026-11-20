@@ -1,24 +1,22 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-
 import { useAuth } from "@/hooks/use-auth";
-import logo from "@/assets/logo.svg";
-import { ArrowRight, Loader2, Mail, UserX } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpLeft,
+  Loader2,
+  Mail,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 
 interface AuthProps {
   redirectAfterAuth?: string;
@@ -52,6 +50,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       navigate(redirect);
     }
   }, [authLoading, isAuthenticated, navigate, redirect]);
+
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -61,12 +60,10 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       await signIn("email-otp", formData);
       setStep({ email: formData.get("email") as string });
       setIsLoading(false);
-    } catch (error) {
-      console.error("Email sign-in error:", error);
+    } catch (signInError) {
+      console.error("Email sign-in error:", signInError);
       setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to send verification code. Please try again.",
+        "تعذّر إرسال رمز الدخول. تأكد من البريد الإلكتروني وحاول مرة أخرى.",
       );
       setIsLoading(false);
     }
@@ -79,16 +76,11 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     try {
       const formData = new FormData(event.currentTarget);
       await signIn("email-otp", formData);
-
-      console.log("signed in");
-
       navigate(redirect);
-    } catch (error) {
-      console.error("OTP verification error:", error);
-
-      setError("The verification code you entered is incorrect.");
+    } catch (verifyError) {
+      console.error("OTP verification error:", verifyError);
+      setError("الرمز غير صحيح أو منتهي الصلاحية. اطلب رمزاً جديداً.");
       setIsLoading(false);
-
       setOtp("");
     }
   };
@@ -97,199 +89,261 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("Attempting anonymous sign in...");
       await signIn("anonymous");
-      console.log("Anonymous sign in successful");
       navigate(redirect);
-    } catch (error) {
-      console.error("Guest login error:", error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      setError(`Failed to sign in as guest: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } catch (guestError) {
+      console.error("Guest login error:", guestError);
+      setError("تعذّر الدخول السريع حالياً. جرّب الدخول بالبريد.");
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-paper text-ink">
+      <div className="grid min-h-screen lg:grid-cols-[0.95fr_1.05fr]">
+        <aside className="relative hidden overflow-hidden border-e border-ink/10 canvas-dark px-10 py-12 lg:flex lg:flex-col">
+          <Link to="/" className="flex flex-col leading-none">
+            <span className="mono text-2xl tracking-[0.22em] text-ink">ZOMA</span>
+            <span className="mono mt-1 flex items-center gap-1.5 text-[7.5px] tracking-[0.26em] text-ink-soft/45">
+              STORE
+              <span className="inline-block size-1 bg-gold" />
+              CAIRO
+            </span>
+          </Link>
 
-      
-      {/* Auth Content */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex items-center justify-center h-full flex-col">
-        <Card className="min-w-[350px] pb-0 border shadow-md">
-          {step === "signIn" ? (
-            <>
-              <CardHeader className="text-center">
-              <div className="flex justify-center">
-                    <img
-                      src={logo}
-                      alt="Lock Icon"
-                      width={64}
-                      height={64}
-                      className="rounded-lg mb-4 mt-4 cursor-pointer"
-                      onClick={() => navigate("/")}
-                    />
-                  </div>
-                <CardTitle className="text-xl">Get Started</CardTitle>
-                <CardDescription>
-                  Enter your email to log in or sign up
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleEmailSubmit}>
-                <CardContent>
-                  
-                  <div className="relative flex items-center gap-2">
-                    <div className="relative flex-1">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        name="email"
-                        placeholder="name@example.com"
-                        type="email"
-                        className="pl-9"
-                        disabled={isLoading}
-                        required
-                      />
-                    </div>
-                    <Button
+          <div className="my-auto max-w-sm">
+            <span className="mono bg-gold px-2 py-1 text-[8px] tracking-[0.16em] text-espresso">
+              MEMBER ACCESS
+            </span>
+            <h1 className="mt-5 text-4xl leading-[1.35]">
+              حسابك في Zoma.
+              <span className="block text-gold">كل تفاصيلك في مكان واحد.</span>
+            </h1>
+            <p className="mt-4 text-[12px] leading-7 text-ink-soft/60">
+              احفظ طلباتك، تابع مواعيد القياس، وشارك إطلالتك في المجتمع. الدخول
+              بالبريد لا يحتاج كلمة مرور.
+            </p>
+
+            <ul className="mt-7 space-y-3">
+              {[
+                { icon: ShieldCheck, text: "طلباتك ومواعيدك محفوظة" },
+                { icon: Sparkles, text: "وصول مبكر لقطع الموسم" },
+                { icon: MessageCircle, text: "دعم مباشر على واتساب" },
+              ].map((item) => (
+                <li
+                  key={item.text}
+                  className="flex items-center gap-2.5 text-[11px] text-ink-soft/60"
+                >
+                  <item.icon className="size-3.5 text-gold" strokeWidth={1.5} />
+                  {item.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="mono text-[8px] tracking-[0.16em] text-ink-soft/25">
+            ZOMA STORE / EST. 2026
+          </p>
+        </aside>
+
+        <main className="flex flex-col justify-center px-4 py-10 sm:px-8 lg:px-14">
+          <div className="mx-auto w-full max-w-md">
+            <div className="flex items-center justify-between lg:hidden">
+              <Link to="/" className="flex flex-col leading-none">
+                <span className="mono text-xl tracking-[0.2em] text-ink">
+                  ZOMA
+                </span>
+                <span className="mono mt-1 text-[7px] tracking-[0.22em] text-ink-soft/40">
+                  STORE / CAIRO
+                </span>
+              </Link>
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 text-[10px] text-ink-soft/50"
+              >
+                المتجر
+                <ArrowUpLeft className="size-3" />
+              </Link>
+            </div>
+
+            <div className="mt-10 lg:mt-0">
+              <p className="mono text-[9px] tracking-[0.2em] text-gold">
+                {step === "signIn" ? "SIGN IN / SIGN UP" : "VERIFY CODE"}
+              </p>
+
+              {step === "signIn" ? (
+                <>
+                  <h2 className="mt-3 text-3xl font-semibold text-ink">
+                    الدخول إلى حسابك
+                  </h2>
+                  <p className="mt-2 text-[12px] leading-6 text-ink-soft/55">
+                    أدخل بريدك الإلكتروني وسنرسل لك رمز تحقق من ٦ أرقام. إن لم
+                    يكن لديك حساب، سننشئه تلقائياً.
+                  </p>
+
+                  <form onSubmit={handleEmailSubmit} className="mt-6">
+                    <label className="block">
+                      <span className="mb-1.5 block text-[10px] text-ink-soft/60">
+                        البريد الإلكتروني
+                      </span>
+                      <div className="relative">
+                        <Mail className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-ink-soft/30" />
+                        <Input
+                          name="email"
+                          placeholder="name@example.com"
+                          type="email"
+                          dir="ltr"
+                          className="h-12 rounded-none border-ink/15 bg-paper-deep ps-10 text-start text-sm"
+                          disabled={isLoading}
+                          required
+                        />
+                      </div>
+                    </label>
+
+                    {error && (
+                      <p className="mt-3 border border-destructive/30 bg-destructive/10 px-3 py-2 text-[10px] text-destructive">
+                        {error}
+                      </p>
+                    )}
+
+                    <button
                       type="submit"
-                      variant="outline"
-                      size="icon"
                       disabled={isLoading}
+                      className="mt-4 flex h-12 w-full items-center justify-center gap-2 bg-gold text-[11px] font-semibold tracking-[0.06em] text-espresso transition-opacity hover:opacity-90 disabled:opacity-50"
                     >
                       {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <ArrowRight className="h-4 w-4" />
+                        <Mail className="size-4" />
                       )}
-                    </Button>
-                  </div>
-                  {error && (
-                    <p className="mt-2 text-sm text-red-500">{error}</p>
-                  )}
-                  
-                  <div className="mt-4">
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                          Or
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full mt-4"
-                      onClick={handleGuestLogin}
-                      disabled={isLoading}
-                    >
-                      <UserX className="mr-2 h-4 w-4" />
-                      Continue as Guest
-                    </Button>
-                  </div>
-                </CardContent>
-              </form>
-            </>
-          ) : (
-            <>
-              <CardHeader className="text-center mt-4">
-                <CardTitle>Check your email</CardTitle>
-                <CardDescription>
-                  We've sent a code to {step.email}
-                </CardDescription>
-              </CardHeader>
-              <form onSubmit={handleOtpSubmit}>
-                <CardContent className="pb-4">
-                  <input type="hidden" name="email" value={step.email} />
-                  <input type="hidden" name="code" value={otp} />
+                      إرسال رمز الدخول
+                    </button>
+                  </form>
 
-                  <div className="flex justify-center">
-                    <InputOTP
-                      value={otp}
-                      onChange={setOtp}
-                      maxLength={6}
-                      disabled={isLoading}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && otp.length === 6 && !isLoading) {
-                          // Find the closest form and submit it
-                          const form = (e.target as HTMLElement).closest("form");
-                          if (form) {
-                            form.requestSubmit();
-                          }
-                        }
-                      }}
-                    >
-                      <InputOTPGroup>
-                        {Array.from({ length: 6 }).map((_, index) => (
-                          <InputOTPSlot key={index} index={index} />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
+                  <div className="my-6 flex items-center gap-3">
+                    <span className="h-px flex-1 bg-ink/10" />
+                    <span className="mono text-[8px] tracking-[0.16em] text-ink-soft/30">
+                      OR
+                    </span>
+                    <span className="h-px flex-1 bg-ink/10" />
                   </div>
-                  {error && (
-                    <p className="mt-2 text-sm text-red-500 text-center">
-                      {error}
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground text-center mt-4">
-                    Didn't receive a code?{" "}
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto"
-                      onClick={() => setStep("signIn")}
-                    >
-                      Try again
-                    </Button>
-                  </p>
-                </CardContent>
-                <CardFooter className="flex-col gap-2">
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading || otp.length !== 6}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      <>
-                        Verify code
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                  <Button
+
+                  <button
                     type="button"
-                    variant="ghost"
-                    onClick={() => setStep("signIn")}
+                    onClick={handleGuestLogin}
                     disabled={isLoading}
-                    className="w-full"
+                    className="flex h-12 w-full items-center justify-center gap-2 border border-ink/15 text-[11px] text-ink transition-colors hover:border-ink/40 disabled:opacity-50"
                   >
-                    Use different email
-                  </Button>
-                </CardFooter>
-              </form>
-            </>
-          )}
+                    <UserRound className="size-4 text-gold" />
+                    الدخول السريع كزائر
+                  </button>
+                  <p className="mt-2 text-center text-[9.5px] text-ink-soft/35">
+                    مناسب للتصفح والشراء السريع — يمكنك ربط البريد لاحقاً.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className="mt-3 text-3xl font-semibold text-ink">
+                    أدخل رمز التحقق
+                  </h2>
+                  <p className="mt-2 text-[12px] leading-6 text-ink-soft/55">
+                    أرسلنا رمزاً من ٦ أرقام إلى{" "}
+                    <span className="text-ink" dir="ltr">
+                      {typeof step === "object" ? step.email : ""}
+                    </span>
+                    . تحقق من صندوق الوارد أو مجلد الرسائل غير المرغوب فيها.
+                  </p>
 
-          <div className="py-4 px-6 text-xs text-center text-muted-foreground bg-muted border-t rounded-b-lg">
-            Secured by{" "}
-            <a
-              href="https://freebuff.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-primary transition-colors"
-            >
-              freebuff.com
-            </a>
+                  <form onSubmit={handleOtpSubmit} className="mt-6">
+                    <input
+                      type="hidden"
+                      name="email"
+                      value={typeof step === "object" ? step.email : ""}
+                    />
+                    <input type="hidden" name="code" value={otp} />
+
+                    <div className="flex justify-center" dir="ltr">
+                      <InputOTP
+                        value={otp}
+                        onChange={setOtp}
+                        maxLength={6}
+                        disabled={isLoading}
+                        onKeyDown={(event) => {
+                          if (
+                            event.key === "Enter" &&
+                            otp.length === 6 &&
+                            !isLoading
+                          ) {
+                            const form = (
+                              event.target as HTMLElement
+                            ).closest("form");
+                            if (form) form.requestSubmit();
+                          }
+                        }}
+                      >
+                        <InputOTPGroup className="gap-1.5">
+                          {Array.from({ length: 6 }).map((_, index) => (
+                            <InputOTPSlot
+                              key={index}
+                              index={index}
+                              className="h-12 w-11 rounded-none border border-ink/20 bg-paper-deep text-base first:rounded-none last:rounded-none"
+                            />
+                          ))}
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+
+                    {error && (
+                      <p className="mt-4 border border-destructive/30 bg-destructive/10 px-3 py-2 text-center text-[10px] text-destructive">
+                        {error}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isLoading || otp.length !== 6}
+                      className="mt-5 flex h-12 w-full items-center justify-center gap-2 bg-gold text-[11px] font-semibold tracking-[0.06em] text-espresso transition-opacity hover:opacity-90 disabled:opacity-40"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <ArrowLeft className="size-4" />
+                      )}
+                      تحقق ودخول
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStep("signIn");
+                        setOtp("");
+                        setError(null);
+                      }}
+                      disabled={isLoading}
+                      className="mt-3 flex h-10 w-full items-center justify-center gap-1.5 text-[10px] text-ink-soft/50 transition-colors hover:text-ink"
+                    >
+                      استخدام بريد آخر
+                    </button>
+                  </form>
+                </>
+              )}
+
+              <div className="mt-8 border-t border-ink/10 pt-4">
+                <Link
+                  to="/"
+                  className="flex items-center gap-1.5 text-[10px] text-ink-soft/40 transition-colors hover:text-gold"
+                >
+                  <ArrowUpLeft className="size-3" />
+                  العودة إلى المتجر
+                </Link>
+                <p className="mt-3 text-[9px] leading-5 text-ink-soft/25">
+                  نحتفظ ببيانات حسابك لتأكيد الطلبات والمواعيد فقط. لا نشاركها
+                  مع أطراف أخرى.
+                </p>
+              </div>
+            </div>
           </div>
-        </Card>
-        </div>
+        </main>
       </div>
     </div>
   );

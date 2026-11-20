@@ -1,16 +1,7 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2, Lock } from "lucide-react";
 import type { ReactNode } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 
 /**
  * Wraps a route that requires a signed-in user.
@@ -23,16 +14,13 @@ import { Navigate, useLocation, useNavigate } from "react-router";
  */
 export function RequireAuth({
   children,
-  title = "Sign in to continue",
-  description = "This page is only available to signed-in users.",
+  title = "سجّل الدخول للمتابعة",
+  description = "هذه الصفحة متاحة للحسابات المسجلة فقط.",
   redirectImmediately = false,
 }: {
   children: ReactNode;
-  /** Headline on the blocked screen. */
   title?: string;
-  /** Says what the visitor gets by signing in. */
   description?: string;
-  /** Skip the explanation and go straight to `/auth`. */
   redirectImmediately?: boolean;
 }) {
   const { isLoading, isAuthenticated } = useAuth();
@@ -41,8 +29,8 @@ export function RequireAuth({
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      <main className="flex min-h-screen items-center justify-center bg-paper">
+        <Loader2 className="size-5 animate-spin text-gold" />
       </main>
     );
   }
@@ -56,33 +44,35 @@ export function RequireAuth({
     }
 
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background p-6">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex justify-center">
-              <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
-                <Lock className="size-5 text-muted-foreground" />
-              </div>
-            </div>
-            <CardTitle className="text-xl">{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </CardHeader>
-          <CardContent className="text-center text-sm text-muted-foreground">
-            You'll come straight back to this page once you're signed in.
-          </CardContent>
-          <CardFooter className="flex flex-col gap-2">
-            <Button className="w-full" onClick={() => navigate(signInHref)}>
-              Sign in
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={() => navigate("/")}
-            >
-              Back to home
-            </Button>
-          </CardFooter>
-        </Card>
+      <main className="flex min-h-screen items-center justify-center canvas-dark p-6">
+        <div className="w-full max-w-md border border-ink/10 bg-card p-7 text-center">
+          <div className="mx-auto flex size-11 items-center justify-center border border-gold/30 bg-gold/5">
+            <Lock className="size-4 text-gold" />
+          </div>
+          <p className="mono mt-5 text-[9px] tracking-[0.2em] text-gold">
+            ACCOUNT REQUIRED
+          </p>
+          <h1 className="mt-2 text-2xl text-ink">{title}</h1>
+          <p className="mt-2 text-[11.5px] leading-6 text-ink-soft/55">
+            {description}
+          </p>
+          <p className="mt-1 text-[10px] text-ink-soft/35">
+            ستعود إلى هذه الصفحة مباشرة بعد الدخول.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate(signInHref)}
+            className="mt-5 h-11 w-full bg-gold text-[11px] font-semibold text-espresso transition-opacity hover:opacity-90"
+          >
+            تسجيل الدخول
+          </button>
+          <Link
+            to="/"
+            className="mt-2 flex h-10 w-full items-center justify-center border border-ink/15 text-[10.5px] text-ink-soft/60 transition-colors hover:border-ink/40 hover:text-ink"
+          >
+            العودة إلى المتجر
+          </Link>
+        </div>
       </main>
     );
   }
