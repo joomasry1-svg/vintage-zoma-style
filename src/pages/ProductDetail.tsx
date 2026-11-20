@@ -12,7 +12,7 @@ import {
   whatsappLink,
 } from "@/lib/store-helpers";
 import { SiteLayout } from "@/components/site-layout";
-import { ProductPlate } from "@/components/garment-plate";
+import { ProductVisual } from "@/components/product-visual";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -32,7 +32,7 @@ import {
 
 export default function ProductDetail() {
   const { slug } = useParams();
-  const { products, settings, cart } = useStore();
+  const { products, categories, settings, cart } = useStore();
   const { isAuthenticated } = useAuth();
   const product = products.find((item) => item.id === slug);
 
@@ -138,7 +138,7 @@ export default function ProductDetail() {
             CATALOG
           </Link>
           <span>/</span>
-          <span>{categoryLabel(product.category)}</span>
+          <span>{categoryLabel(product.category, categories)}</span>
           <span>/</span>
           <span className="text-ink-soft/70">{product.name}</span>
         </div>
@@ -149,32 +149,37 @@ export default function ProductDetail() {
           <div>
             <div className="relative border border-ink/10 bg-card p-2.5">
               <div className="relative aspect-[4/5] overflow-hidden">
-                <ProductPlate
-                  kind={product.kind}
-                  tone={activeColor?.hex ?? product.tone}
+                <ProductVisual
+                  product={product}
                   className="h-full w-full"
+                  imageClassName={cn(
+                    "transition-transform duration-700 ease-out",
+                    zoom && "scale-[1.6]",
+                  )}
                   plateClassName={cn(
                     "p-8 transition-transform duration-700 ease-out",
                     zoom && "scale-[1.6]",
                   )}
+                  eager
                 >
-                  <span className="mono absolute top-4 start-4 bg-[#211c17]/85 px-2 py-1 text-[7px] tracking-[0.18em] text-[#efe9dc]">
-                    ARCHIVE PLATE / {product.kind.toUpperCase()}
+                  <span className="mono absolute top-4 start-4 z-10 bg-espresso/80 px-2 py-1 text-[7px] tracking-[0.18em] text-stage backdrop-blur">
+                    ZOMA EDIT / {product.kind.toUpperCase()}
                   </span>
                   {product.discount > 0 && (
-                    <span className="mono absolute top-4 end-4 border border-[#211c17]/20 bg-stage/90 px-2 py-1 text-[9px] text-[#211c17]">
+                    <span className="shimmer-sweep mono absolute top-4 end-4 z-10 border border-gold/40 bg-espresso/80 px-2 py-1 text-[9px] text-gold backdrop-blur">
                       -{product.discount}%
                     </span>
                   )}
-                </ProductPlate>
+                </ProductVisual>
                 <button
                   type="button"
                   onClick={() => setZoom((current) => !current)}
-                  className="absolute bottom-3 end-3 flex items-center gap-1.5 border border-[#211c17]/20 bg-stage/90 px-2.5 py-1.5 text-[9px] text-[#211c17] transition-colors hover:bg-[#211c17] hover:text-stage"
+                  className="absolute bottom-3 end-3 z-10 flex items-center gap-1.5 border border-white/25 bg-espresso/80 px-2.5 py-1.5 text-[9px] text-white backdrop-blur transition-colors hover:bg-gold hover:text-espresso"
                 >
                   <Maximize2 className="size-3" />
                   {zoom ? "تصغير" : "تكبير"}
                 </button>
+
               </div>
             </div>
 
@@ -202,7 +207,7 @@ export default function ProductDetail() {
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="mono text-[9px] tracking-[0.18em] text-gold">
-                {categoryLabel(product.category).toUpperCase()} /{" "}
+                {categoryLabel(product.category, categories).toUpperCase()} /{" "}
                 {product.kind.toUpperCase()}
               </p>
               <div className="flex items-center gap-2">
@@ -550,10 +555,10 @@ export default function ProductDetail() {
                   to={`/product/${item.id}`}
                   className="group border border-ink/10 bg-card p-2 transition-colors hover:border-gold/40"
                 >
-                  <ProductPlate
-                    kind={item.kind}
-                    tone={item.tone}
+                  <ProductVisual
+                    product={item}
                     className="aspect-[4/5] w-full"
+                    imageClassName="transition-transform duration-700 group-hover:scale-[1.05]"
                     plateClassName="p-4 transition-transform duration-500 group-hover:scale-[1.03]"
                     framed={false}
                   />

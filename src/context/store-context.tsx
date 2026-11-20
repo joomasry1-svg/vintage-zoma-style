@@ -9,17 +9,20 @@ import {
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import {
+  CATEGORIES,
   DEFAULT_SETTINGS,
   PRODUCTS,
   type CategoryId,
   type GarmentKind,
   type Product,
+  type StoreCategory,
   type StoreSettings,
 } from "@/data/store";
 import { useCart } from "@/hooks/use-cart";
 
 type StoreContextValue = {
   products: Product[];
+  categories: StoreCategory[];
   settings: StoreSettings;
   cart: ReturnType<typeof useCart>;
   isLoading: boolean;
@@ -29,6 +32,7 @@ const StoreContext = createContext<StoreContextValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const productsQuery = useQuery(api.store.listProducts);
+  const categoriesQuery = useQuery(api.store.listCategories);
   const settingsQuery = useQuery(api.store.getSettings);
   const ensureSeed = useMutation(api.store.ensureSeed);
   const seeded = useRef(false);
@@ -64,8 +68,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       badge: doc.badge,
       inStock: doc.inStock,
       keywords: doc.keywords,
+      imageUrl: doc.imageUrl,
+      secondImageUrl: doc.secondImageUrl,
     }));
   }, [productsQuery, storeIsSeeded]);
+
+  const categories = useMemo<StoreCategory[]>(() => {
+    if (!categoriesQuery || categoriesQuery.length === 0) return CATEGORIES;
+    return categoriesQuery.map((doc) => ({
+      id: doc.slug,
+      label: doc.label,
+      note: doc.note,
+      imageUrl: doc.imageUrl,
+    }));
+  }, [categoriesQuery]);
 
   useEffect(() => {
     if (!settingsQuery) return;
@@ -85,6 +101,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       paymentMethods: settingsQuery.paymentMethods,
       footerCredit: settingsQuery.footerCredit,
       footerCreditUrl: settingsQuery.footerCreditUrl,
+      logoUrl: settingsQuery.logoUrl ?? "",
+      heroSlides: settingsQuery.heroSlides ?? DEFAULT_SETTINGS.heroSlides,
+      banner: settingsQuery.banner ?? DEFAULT_SETTINGS.banner,
     };
   }, [settingsQuery]);
 
@@ -92,9 +111,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     <StoreContext.Provider
       value={{
         products,
+        categories,
         settings,
         cart,
-        isLoading: productsQuery === undefined || settingsQuery === undefined,
+        isLoading:
+          productsQuery === undefined ||
+          settingsQuery === undefined ||
+          categoriesQuery === undefined,
       }}
     >
       {children}

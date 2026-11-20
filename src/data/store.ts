@@ -1,20 +1,66 @@
-export const CATEGORIES = [
+export type StoreCategory = {
+  id: string;
+  label: string;
+  note: string;
+  imageUrl?: string;
+};
+
+export const CATEGORIES: StoreCategory[] = [
+  {
+    id: "outerwear",
+    label: "المعاطف والجواكت",
+    note: "صوف وثير وجلد طبيعي لموسم الشتاء",
+    imageUrl: "/images/editorial/hero-black-coat.jpg",
+  },
   {
     id: "suits",
     label: "البدلات",
     note: "قصّات صوفية كلاسيكية للحظة التي تليق بك",
+    imageUrl: "/images/editorial/suit-portrait.jpg",
   },
-  { id: "blazers", label: "البليزرات", note: "طبقة أنيقة فوق أي تفصيل" },
-  { id: "shirts", label: "القمصان", note: "قطن وأكتان بلمسة أرشيفية" },
-  { id: "polos", label: "البولو", note: "كاجوال راقٍ بعناية" },
-  { id: "trousers", label: "البناطيل", note: "ساق مستقيمة وقصّة مريحة" },
-  { id: "shoes", label: "الأحذية", note: "جلد طبيعي وخياطة يدوية" },
-  { id: "accessories", label: "الإكسسوارات", note: "التفاصيل الصغيرة تُكمل الحكاية" },
-] as const;
+  {
+    id: "blazers",
+    label: "البليزرات",
+    note: "طبقة أنيقة فوق أي تفصيل",
+    imageUrl: "/images/editorial/wool-closeup.jpg",
+  },
+  {
+    id: "shirts",
+    label: "القمصان",
+    note: "قطن وأكتان بلمسة أرشيفية",
+    imageUrl: "/images/editorial/suit-street.jpg",
+  },
+  {
+    id: "polos",
+    label: "البولو",
+    note: "كاجوال راقٍ بعناية",
+    imageUrl: "/images/editorial/puffer-portrait.jpg",
+  },
+  {
+    id: "trousers",
+    label: "البناطيل",
+    note: "ساق مستقيمة وقصّة مريحة",
+    imageUrl: "/images/editorial/boutique.jpg",
+  },
+  {
+    id: "shoes",
+    label: "الأحذية",
+    note: "جلد طبيعي وخياطة يدوية",
+    imageUrl: "/images/editorial/shoes.jpg",
+  },
+  {
+    id: "accessories",
+    label: "الإكسسوارات",
+    note: "التفاصيل الصغيرة تُكمل الحكاية",
+    imageUrl: "/images/editorial/accessories.jpg",
+  },
+];
 
-export type CategoryId = (typeof CATEGORIES)[number]["id"];
+export type CategoryId = string;
 
 export type GarmentKind =
+  | "coat"
+  | "jacket"
   | "suit"
   | "blazer"
   | "shirt"
@@ -42,9 +88,11 @@ export type Product = {
   badge?: "new" | "hot";
   inStock: boolean;
   keywords: string[];
+  imageUrl?: string;
+  secondImageUrl?: string;
 };
 
-export const PRODUCTS: Product[] = [
+const BASE_PRODUCTS: Product[] = [
   {
     id: "savile-suit",
     name: 'بدلة "سافيلي" الصوفية',
@@ -432,13 +480,223 @@ export const PRODUCTS: Product[] = [
     inStock: true,
     keywords: ["ربطة", "كرافة", "عنق", "حرير", "إكسسوار", "رسمي"],
   },
+  {
+    id: "kensington-overcoat",
+    name: 'معطف "كينغستون" الصوفي',
+    category: "outerwear",
+    kind: "coat",
+    description:
+      "معطف صوف طويل بقصّة مستقيمة وياقة مقلوبة، مصنوع ليمنح الطلة حضوراً هادئاً في أبرد أيام المدينة. بطانة حريرية وأزرار قرنية تكمل التفاصيل.",
+    fabric: "صوف ميرينو ٩٠٪ — بطانة حرير",
+    price: 6400,
+    discount: 25,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "فحمي", hex: "#232325" },
+      { name: "كحلي ليلي", hex: "#1e2735" },
+    ],
+    tone: "#232325",
+    badge: "hot",
+    inStock: true,
+    keywords: ["معطف", "بالطو", "صوف", "شتوي", "فحمي", "فاخر"],
+  },
+  {
+    id: "camel-crest-coat",
+    name: 'معطف "كاميل كريست"',
+    category: "outerwear",
+    kind: "coat",
+    description:
+      "كاميل دافئ بقماش مزدوج وظهر مفتوح، مستوحى من معاطف المشي الإيطالية. خفيف على الكتف وواسع بما يكفي لطبقة كشمير تحته.",
+    fabric: "خليط صوف وكشمير — نسج مزدوج",
+    price: 5900,
+    discount: 20,
+    sizes: ["S", "M", "L", "XL"],
+    colors: [
+      { name: "كاميل", hex: "#b49a76" },
+      { name: "رملي", hex: "#c8b393" },
+    ],
+    tone: "#b49a76",
+    badge: "new",
+    inStock: true,
+    keywords: ["معطف", "كاميل", "كشمير", "شتوي", "بيج"],
+  },
+  {
+    id: "rider-leather-jacket",
+    name: 'جاكيت "رايدر" الجلدي',
+    category: "outerwear",
+    kind: "jacket",
+    description:
+      "جاكيت جلد طبيعي بلمسة مطفية وياقة قائمة وسحّاب نحاسي، يُلبس فوق قميص أو هودي بلا مجهود. يتشكل على الجسم مع الوقت ويصبح قطعة شخصية.",
+    fabric: "جلد بقري طبيعي — سحّاب نحاسي",
+    price: 5200,
+    discount: 15,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "أسود", hex: "#1c1b1a" },
+      { name: "بني داكن", hex: "#4a3527" },
+    ],
+    tone: "#1c1b1a",
+    badge: "hot",
+    inStock: true,
+    keywords: ["جاكيت", "جلد", "ليذر", "أسود", "شتوي"],
+  },
+  {
+    id: "orbital-puffer",
+    name: 'جاكيت "أوربتال" البافر',
+    category: "outerwear",
+    kind: "jacket",
+    description:
+      "بافر خفيف بحشوة عازلة وقصّة قصيرة، صُمم للحركة في المدينة والسفر. يمنع الريح ويحتفظ بالدفء دون ثقل على الكتفين.",
+    fabric: "نايلون مقاوم للريح — حشوة عازلة",
+    price: 3600,
+    discount: 30,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "أسود", hex: "#17181a" },
+      { name: "رمادي دخاني", hex: "#5b5d61" },
+    ],
+    tone: "#17181a",
+    badge: "new",
+    inStock: true,
+    keywords: ["بافر", "جاكيت", "شتوي", "خفيف", "سفر"],
+  },
 ];
+
+const PRODUCT_IMAGES: Record<
+  string,
+  { imageUrl?: string; secondImageUrl?: string }
+> = {
+  "savile-suit": {
+    imageUrl: "/images/editorial/suit-portrait.jpg",
+    secondImageUrl: "/images/editorial/suit-street.jpg",
+  },
+  "orlean-suit": {
+    imageUrl: "/images/editorial/hero-overcoat.jpg",
+    secondImageUrl: "/images/editorial/suit-portrait.jpg",
+  },
+  "royal-suit": {
+    imageUrl: "/images/editorial/hero-suit-coat.jpg",
+    secondImageUrl: "/images/editorial/suit-portrait.jpg",
+  },
+  "london-suit": {
+    imageUrl: "/images/editorial/suit-street.jpg",
+    secondImageUrl: "/images/editorial/boutique.jpg",
+  },
+  "torino-suit": {
+    imageUrl: "/images/editorial/hero-beige.jpg",
+    secondImageUrl: "/images/editorial/trench-indoor.jpg",
+  },
+  "ghazal-blazer": {
+    imageUrl: "/images/editorial/boutique.jpg",
+    secondImageUrl: "/images/editorial/wool-closeup.jpg",
+  },
+  "archive-blazer": {
+    imageUrl: "/images/editorial/wool-closeup.jpg",
+    secondImageUrl: "/images/editorial/boutique.jpg",
+  },
+  "nice-blazer": {
+    imageUrl: "/images/editorial/trench-indoor.jpg",
+    secondImageUrl: "/images/editorial/hero-beige.jpg",
+  },
+  "oxford-shirt": {
+    imageUrl: "/images/editorial/hero-suit-coat.jpg",
+    secondImageUrl: "/images/editorial/suit-portrait.jpg",
+  },
+  "clear-shirt": {
+    imageUrl: "/images/editorial/suit-street.jpg",
+    secondImageUrl: "/images/editorial/suit-portrait.jpg",
+  },
+  "marsa-shirt": {
+    imageUrl: "/images/editorial/boutique.jpg",
+    secondImageUrl: "/images/editorial/hero-beige.jpg",
+  },
+  "harlem-shirt": {
+    imageUrl: "/images/editorial/suit-portrait.jpg",
+    secondImageUrl: "/images/editorial/suit-street.jpg",
+  },
+  "como-polo": {
+    imageUrl: "/images/editorial/puffer-portrait.jpg",
+    secondImageUrl: "/images/editorial/puffer-city.jpg",
+  },
+  "riviera-polo": {
+    imageUrl: "/images/editorial/puffer-city.jpg",
+    secondImageUrl: "/images/editorial/puffer-portrait.jpg",
+  },
+  "savoy-trousers": {
+    imageUrl: "/images/editorial/suit-portrait.jpg",
+    secondImageUrl: "/images/editorial/suit-street.jpg",
+  },
+  "chino-trousers": {
+    imageUrl: "/images/editorial/boutique.jpg",
+    secondImageUrl: "/images/editorial/trench-indoor.jpg",
+  },
+  "blackwood-shoes": {
+    imageUrl: "/images/editorial/shoes.jpg",
+    secondImageUrl: "/images/editorial/accessories.jpg",
+  },
+  "aladdin-loafers": {
+    imageUrl: "/images/editorial/shoes.jpg",
+    secondImageUrl: "/images/editorial/accessories.jpg",
+  },
+  "oru-belt": {
+    imageUrl: "/images/editorial/accessories.jpg",
+    secondImageUrl: "/images/editorial/shoes.jpg",
+  },
+  "archive-watch": {
+    imageUrl: "/images/editorial/accessories.jpg",
+    secondImageUrl: "/images/editorial/wool-closeup.jpg",
+  },
+  "moritz-tie": {
+    imageUrl: "/images/editorial/accessories.jpg",
+    secondImageUrl: "/images/editorial/suit-portrait.jpg",
+  },
+  "kensington-overcoat": {
+    imageUrl: "/images/editorial/hero-black-coat.jpg",
+    secondImageUrl: "/images/editorial/hero-trench.jpg",
+  },
+  "camel-crest-coat": {
+    imageUrl: "/images/editorial/hero-beige.jpg",
+    secondImageUrl: "/images/editorial/trench-indoor.jpg",
+  },
+  "rider-leather-jacket": {
+    imageUrl: "/images/editorial/leather-studio.jpg",
+    secondImageUrl: "/images/editorial/leather-dark.jpg",
+  },
+  "orbital-puffer": {
+    imageUrl: "/images/editorial/puffer-city.jpg",
+    secondImageUrl: "/images/editorial/puffer-portrait.jpg",
+  },
+};
+
+export const PRODUCTS: Product[] = BASE_PRODUCTS.map((product) => ({
+  ...product,
+  ...PRODUCT_IMAGES[product.id],
+}));
 
 export type PaymentMethod = {
   id: string;
   label: string;
   note: string;
   enabled: boolean;
+};
+
+export type HeroSlide = {
+  imageUrl: string;
+  videoUrl?: string;
+  title: string;
+  subtitle: string;
+  kicker: string;
+  productId?: string;
+};
+
+export type PromoBanner = {
+  enabled: boolean;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  ctaLabel: string;
+  ctaHref: string;
 };
 
 export type StoreSettings = {
@@ -452,6 +710,58 @@ export type StoreSettings = {
   paymentMethods: PaymentMethod[];
   footerCredit: string;
   footerCreditUrl: string;
+  logoUrl?: string;
+  heroSlides?: HeroSlide[];
+  banner?: PromoBanner;
+};
+
+export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
+  {
+    imageUrl: "/images/editorial/hero-black-coat.jpg",
+    kicker: "THE WINTER EDIT / 01",
+    title: "الشتاء بقصّة تخصّك",
+    subtitle: "معاطف صوف وجلد طبيعي، مختارة لتبقى معك أطول من موسم.",
+    productId: "kensington-overcoat",
+  },
+  {
+    imageUrl: "/images/editorial/hero-suit-coat.jpg",
+    kicker: "TAILORING / 02",
+    title: "حضور لا يحتاج وصفاً",
+    subtitle: "بدلات بكتف مضبوط وقماش يتنفس، من أول اجتماع حتى آخر الليل.",
+    productId: "savile-suit",
+  },
+  {
+    imageUrl: "/images/editorial/hero-trench.jpg",
+    kicker: "MILANO ARCHIVE / 03",
+    title: "طبقة واحدة تغيّر كل شيء",
+    subtitle: "ترنش كوت بقصّة إيطالية، خفيف فوق البدلة وقوي أمام المطر.",
+    productId: "camel-crest-coat",
+  },
+  {
+    imageUrl: "/images/editorial/leather-studio.jpg",
+    kicker: "LEATHER / 04",
+    title: "جلد يتشكّل بك",
+    subtitle: "رايدر جاكيت بجلد طبيعي ولمسة مطفية، يصبح أفضل كل سنة.",
+    productId: "rider-leather-jacket",
+  },
+  {
+    imageUrl: "/images/editorial/hero-beige.jpg",
+    kicker: "CAMEL & CASHMERE / 05",
+    title: "دفء بلون النهار",
+    subtitle: "كاميل هادئ يناسب القاهرة كما يناسب ميلانو.",
+    productId: "camel-crest-coat",
+  },
+];
+
+export const DEFAULT_BANNER: PromoBanner = {
+  enabled: true,
+  eyebrow: "VIP WINTER INVITATION",
+  title: "خصم يصل إلى ٣٠٪ على طبقات الشتاء",
+  subtitle:
+    "اختيار محدود من المعاطف الصوفية والجاكيتات الجلدية. الكمية محدودة، والأولوية لعملاء Zoma.",
+  imageUrl: "/images/editorial/milan-rain.jpg",
+  ctaLabel: "اكتشف تشكيلة الشتاء",
+  ctaHref: "/?cat=outerwear#catalog",
 };
 
 export const STORE = {
@@ -501,4 +811,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   paymentMethods: STORE.paymentMethods,
   footerCredit: STORE.footerCredit,
   footerCreditUrl: STORE.footerCreditUrl,
+  logoUrl: "",
+  heroSlides: DEFAULT_HERO_SLIDES,
+  banner: DEFAULT_BANNER,
 };

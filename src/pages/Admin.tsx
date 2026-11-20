@@ -1,9 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { useMutation, useQuery } from "convex/react";
+import { useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { CATEGORIES, type CategoryId, type GarmentKind } from "@/data/store";
+import {
+  DEFAULT_BANNER,
+  DEFAULT_HERO_SLIDES,
+  type CategoryId,
+  type GarmentKind,
+  type HeroSlide,
+  type PromoBanner,
+} from "@/data/store";
 import {
   BOOKING_STATUS_LABELS,
   formatDateTime,
@@ -22,11 +29,14 @@ import {
   ChevronDown,
   LayoutGrid,
   LogOut,
+  ImagePlus,
   MessageSquare,
   Package,
   Pencil,
   Plus,
   Settings,
+  Tag,
+  Upload,
   ShoppingBag,
   Star,
   Trash2,
@@ -39,6 +49,7 @@ const TOKEN_KEY = "zoma-admin-token";
 const TABS = [
   { id: "overview", label: "نظرة عامة", icon: LayoutGrid },
   { id: "products", label: "المنتجات", icon: Package },
+  { id: "categories", label: "الأقسام", icon: Tag },
   { id: "orders", label: "الطلبات", icon: ShoppingBag },
   { id: "bookings", label: "المواعيد", icon: CalendarDays },
   { id: "community", label: "المجتمع", icon: Users },
@@ -49,6 +60,8 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 const KINDS: GarmentKind[] = [
+  "coat",
+  "jacket",
   "suit",
   "blazer",
   "shirt",
@@ -76,6 +89,9 @@ type AdminSettings = {
   }[];
   footerCredit: string;
   footerCreditUrl: string;
+  logoUrl: string;
+  heroSlides: HeroSlide[];
+  banner: PromoBanner | null;
   adminEmail: string;
   updatedAt: number;
 };
@@ -95,6 +111,8 @@ type ProductDraft = {
   badge: "" | "new" | "hot";
   inStock: boolean;
   keywords: string;
+  imageUrl: string;
+  secondImageUrl: string;
 };
 
 const EMPTY_DRAFT: ProductDraft = {
@@ -111,6 +129,8 @@ const EMPTY_DRAFT: ProductDraft = {
   badge: "",
   inStock: true,
   keywords: "",
+  imageUrl: "",
+  secondImageUrl: "",
 };
 
 export default function Admin() {
@@ -345,7 +365,19 @@ export default function Admin() {
         )}
 
         {tab === "products" && (
-          <ProductsPanel token={token} products={data.products} />
+          <ProductsPanel
+            token={token}
+            products={data.products}
+            categories={data.categories}
+          />
+        )}
+
+        {tab === "categories" && (
+          <CategoriesPanel
+            token={token}
+            categories={data.categories}
+            products={data.products}
+          />
         )}
 
         {tab === "orders" && <OrdersPanel token={token} orders={data.orders} />}
@@ -367,7 +399,11 @@ export default function Admin() {
         )}
 
         {tab === "settings" && (
-          <SettingsPanel token={token} settings={data.settings} />
+          <SettingsPanel
+            token={token}
+            settings={data.settings}
+            products={data.products}
+          />
         )}
       </main>
     </div>
@@ -541,9 +577,11 @@ function OverviewPanel({
 function ProductsPanel({
   token,
   products,
+  categories,
 }: {
   token: string;
   products: Doc<"products">[];
+  categories: Doc<"categories">[];
 }) {
   const [draft, setDraft] = useState<ProductDraft | null>(null);
   const saveProduct = useMutation(api.admin.saveProduct);
@@ -568,6 +606,8 @@ function ProductsPanel({
       badge: product.badge ?? "",
       inStock: product.inStock,
       keywords: product.keywords.join(", "),
+      imageUrl: product.imageUrl ?? "",
+      secondImageUrl: product.secondImageUrl ?? "",
     });
   };
 
@@ -608,6 +648,8 @@ function ProductsPanel({
           badge: draft.badge || undefined,
           inStock: draft.inStock,
           keywords: draft.keywords.split(/[,،\n]/),
+          imageUrl: draft.imageUrl.trim() || undefined,
+          secondImageUrl: draft.secondImageUrl.trim() || undefined,
         },
       });
       toast.success(draft.id ? "تم تحديث المنتج" : "تمت إضافة المنتج");
@@ -645,7 +687,12 @@ function ProductsPanel({
         </div>
         <button
           type="button"
-          onClick={() => setDraft({ ...EMPTY_DRAFT })}
+          onClick={() =>
+            setDraft({
+              ...EMPTY_DRAFT,
+              category: categories[0]?.slug ?? "outerwear",
+            })
+          }
           className="flex h-10 items-center gap-2 bg-gold px-4 text-[10.5px] font-semibold text-espresso"
         >
           <Plus className="size-3.5" />
@@ -692,8 +739,8 @@ function ProductsPanel({
                     setDraft({ ...draft, category: value as CategoryId })
                   }
                 >
-                  {CATEGORIES.map((category) => (
-                    <option key={category.id} value={category.id}>
+                  {categories.map((category) => (
+                    <option key={category._id} value={category.slug}>
                       {category.label}
                     </option>
                   ))}
@@ -714,6 +761,23 @@ function ProductsPanel({
                 </SelectInput>
               </Field>
             </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <ImageUpload
+              token={token}
+              value={draft.imageUrl}
+              onChange={(imageUrl) => setDraft({ ...draft, imageUrl })}
+              label="الصورة الأساسية للمنتج"
+            />
+            <ImageUpload
+              token={token}
+              value={draft.secondImageUrl}
+              onChange={(secondImageUrl) =>
+                setDraft({ ...draft, secondImageUrl })
+              }
+              label="زاوية ثانية (تظهر عند المرور)"
+            />
           </div>
 
           <div className="mt-3 grid gap-3 sm:grid-cols-4">
@@ -847,7 +911,7 @@ function ProductsPanel({
                 onChange={(event) =>
                   setDraft({ ...draft, inStock: event.target.checked })
                 }
-                className="size-3.5 accent-[#d9ff57]"
+                className="size-3.5 accent-[#c5a059]"
               />
               متوفر في المخزون
             </label>
@@ -899,15 +963,25 @@ function ProductsPanel({
               key={product._id}
               className="flex flex-wrap items-center gap-3 border border-ink/10 bg-card p-3"
             >
-              <div
-                className="size-11 shrink-0 border border-ink/10"
-                style={{ backgroundColor: product.tone }}
-              />
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt=""
+                  className="size-11 shrink-0 border border-ink/10 object-cover"
+                />
+              ) : (
+                <div
+                  className="size-11 shrink-0 border border-ink/10"
+                  style={{ backgroundColor: product.tone }}
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[12px] text-ink">{product.name}</p>
                 <p className="mono mt-0.5 text-[8px] text-ink-soft/35">
-                  {product.category.toUpperCase()} / {product.kind.toUpperCase()} ·{" "}
-                  {product.sizes.length} SIZES · {product.inStock ? "IN STOCK" : "OUT OF STOCK"}
+                  {categories.find((entry) => entry.slug === product.category)
+                    ?.label ?? product.category}{" "}
+                  / {product.kind.toUpperCase()} · {product.sizes.length} SIZES ·{" "}
+                  {product.inStock ? "IN STOCK" : "OUT OF STOCK"}
                 </p>
               </div>
               <div className="text-end">
@@ -945,6 +1019,231 @@ function ProductsPanel({
             </div>
           ))
         )}
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------- Categories -------------------------------- */
+
+type CategoryDraft = {
+  id?: Id<"categories">;
+  label: string;
+  note: string;
+  imageUrl: string;
+};
+
+function CategoriesPanel({
+  token,
+  categories,
+  products,
+}: {
+  token: string;
+  categories: Doc<"categories">[];
+  products: Doc<"products">[];
+}) {
+  const saveCategory = useMutation(api.admin.saveCategory);
+  const removeCategory = useMutation(api.admin.deleteCategory);
+  const [draft, setDraft] = useState<CategoryDraft | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!draft) return;
+    setIsSaving(true);
+    try {
+      await saveCategory({
+        token,
+        id: draft.id,
+        category: {
+          label: draft.label.trim(),
+          note: draft.note.trim(),
+          imageUrl: draft.imageUrl.trim() || undefined,
+        },
+      });
+      toast.success(draft.id ? "تم تحديث القسم" : "تمت إضافة القسم");
+      setDraft(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "تعذّر حفظ القسم.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async (category: Doc<"categories">) => {
+    if (!window.confirm(`حذف قسم «${category.label}» نهائياً؟`)) return;
+    try {
+      await removeCategory({ token, id: category._id });
+      toast.success("تم حذف القسم");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "تعذّر حذف القسم.",
+      );
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="mono text-[9px] tracking-[0.18em] text-gold">
+            SECTIONS
+          </p>
+          <h1 className="mt-2 text-3xl">الأقسام والمجموعات</h1>
+          <p className="mt-1 text-[11px] text-ink-soft/45">
+            أي قسم تضيفه هنا يظهر فوراً في الصفحة الرئيسية والكتالوج والتذييل.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() =>
+            setDraft({ label: "", note: "", imageUrl: "" })
+          }
+          className="flex h-10 items-center gap-2 bg-gold px-4 text-[10.5px] font-semibold text-espresso"
+        >
+          <Plus className="size-3.5" />
+          قسم جديد
+        </button>
+      </div>
+
+      {draft && (
+        <form
+          onSubmit={handleSave}
+          className="mt-5 border border-gold/30 bg-card p-5"
+        >
+          <div className="flex items-center justify-between">
+            <p className="mono text-[9px] tracking-[0.16em] text-gold">
+              {draft.id ? "EDIT SECTION" : "NEW SECTION"}
+            </p>
+            <button
+              type="button"
+              onClick={() => setDraft(null)}
+              className="p-1 text-ink-soft/40 hover:text-ink"
+              aria-label="إغلاق"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Field label="اسم القسم — مثال: عبايات نسائية">
+              <Input
+                value={draft.label}
+                onChange={(event) =>
+                  setDraft({ ...draft, label: event.target.value })
+                }
+                placeholder="عبايات نسائية"
+                className="h-10 rounded-none border-ink/15 bg-paper-deep text-sm"
+                required
+              />
+            </Field>
+            <Field label="وصف قصير يظهر تحت الاسم">
+              <Input
+                value={draft.note}
+                onChange={(event) =>
+                  setDraft({ ...draft, note: event.target.value })
+                }
+                placeholder="قصّات خفيفة تتحرك معك"
+                className="h-10 rounded-none border-ink/15 bg-paper-deep text-sm"
+              />
+            </Field>
+          </div>
+
+          <div className="mt-3">
+            <ImageUpload
+              token={token}
+              value={draft.imageUrl}
+              onChange={(imageUrl) => setDraft({ ...draft, imageUrl })}
+              label="صورة غلاف القسم"
+            />
+          </div>
+
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setDraft(null)}
+              className="h-10 border border-ink/15 px-4 text-[10px] text-ink-soft/60 transition-colors hover:border-ink/40 hover:text-ink"
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="h-10 bg-gold px-5 text-[10.5px] font-semibold text-espresso disabled:opacity-50"
+            >
+              {isSaving ? "جارٍ الحفظ…" : "حفظ القسم"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {categories.map((category) => {
+          const count = products.filter(
+            (product) => product.category === category.slug,
+          ).length;
+          return (
+            <div
+              key={category._id}
+              className="group overflow-hidden border border-ink/10 bg-card"
+            >
+              <div className="relative aspect-[16/9] overflow-hidden bg-paper-deep">
+                {category.imageUrl ? (
+                  <img
+                    src={category.imageUrl}
+                    alt={category.label}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <Tag className="size-6 text-ink-soft/25" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3">
+                  <div>
+                    <p className="text-[13px] font-medium text-white">
+                      {category.label}
+                    </p>
+                    <p className="mono text-[7.5px] text-white/40">
+                      {category.slug.toUpperCase()} · {count} PIECES
+                    </p>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDraft({
+                          id: category._id,
+                          label: category.label,
+                          note: category.note,
+                          imageUrl: category.imageUrl ?? "",
+                        })
+                      }
+                      className="flex size-7 items-center justify-center border border-white/20 bg-black/30 text-white/70 backdrop-blur transition-colors hover:border-gold hover:text-gold"
+                      aria-label={`تعديل ${category.label}`}
+                    >
+                      <Pencil className="size-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(category)}
+                      className="flex size-7 items-center justify-center border border-white/20 bg-black/30 text-white/60 backdrop-blur transition-colors hover:border-destructive/60 hover:text-destructive"
+                      aria-label={`حذف ${category.label}`}
+                    >
+                      <Trash2 className="size-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p className="line-clamp-2 px-3 py-2 text-[10px] leading-5 text-ink-soft/45">
+                {category.note || "بدون وصف"}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1450,9 +1749,11 @@ function ReviewsPanel({
 function SettingsPanel({
   token,
   settings,
+  products,
 }: {
   token: string;
   settings: AdminSettings;
+  products: Doc<"products">[];
 }) {
   const updateSettings = useMutation(api.admin.updateSettings);
   const updateCredentials = useMutation(api.admin.updateCredentials);
@@ -1467,7 +1768,16 @@ function SettingsPanel({
     city: settings.city,
     footerCredit: settings.footerCredit,
     footerCreditUrl: settings.footerCreditUrl,
+    logoUrl: settings.logoUrl ?? "",
   });
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(
+    settings.heroSlides.length > 0
+      ? settings.heroSlides
+      : DEFAULT_HERO_SLIDES,
+  );
+  const [banner, setBanner] = useState<PromoBanner>(
+    settings.banner ?? DEFAULT_BANNER,
+  );
   const [methods, setMethods] = useState(settings.paymentMethods);
   const [adminEmail, setAdminEmail] = useState(settings.adminEmail);
   const [adminPassword, setAdminPassword] = useState("");
@@ -1484,6 +1794,8 @@ function SettingsPanel({
           ...form,
           announcement: form.announcement.split("\n"),
           paymentMethods: methods,
+          heroSlides,
+          banner,
         },
       });
       toast.success("تم تحديث إعدادات المتجر");
@@ -1549,7 +1861,7 @@ function SettingsPanel({
               />
             </Field>
           </div>
-          <div className="mt-3">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label="شريط الإعلانات المتحرك — سطر لكل رسالة">
               <Textarea
                 value={form.announcement}
@@ -1558,6 +1870,248 @@ function SettingsPanel({
                 }
                 rows={3}
                 className="resize-none rounded-none border-ink/15 bg-paper-deep text-[12px]"
+              />
+            </Field>
+            <ImageUpload
+              token={token}
+              value={form.logoUrl}
+              onChange={(logoUrl) => setForm({ ...form, logoUrl })}
+              label="شعار المتجر (يظهر في الهيدر والتذييل)"
+            />
+          </div>
+        </div>
+
+        <div className="border border-ink/10 bg-card p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <p className="mono text-[9px] tracking-[0.16em] text-gold">
+                HERO / الصفحة الرئيسية
+              </p>
+              <p className="mt-1 text-[10px] text-ink-soft/40">
+                صور الكاروسيل ثلاثي الأبعاد. ارفع صورة، واكتب عنوانها، واختر
+                المنتج المرتبط بها.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                setHeroSlides([
+                  ...heroSlides,
+                  {
+                    imageUrl: "",
+                    kicker: `WINTER / ${String(heroSlides.length + 1).padStart(2, "0")}`,
+                    title: "شريحة جديدة",
+                    subtitle: "اكتب وصفاً قصيراً للقطعة.",
+                    productId: products[0]?.slug,
+                  },
+                ])
+              }
+              className="flex h-8 items-center gap-1 border border-ink/15 px-2.5 text-[9px] text-ink-soft/60 transition-colors hover:border-gold hover:text-gold"
+            >
+              <Plus className="size-3" />
+              إضافة شريحة
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {heroSlides.map((slide, index) => (
+              <div
+                key={`hero-slide-${index}`}
+                className="border border-ink/10 bg-paper-deep/40 p-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="mono text-[8px] tracking-[0.14em] text-gold">
+                    SLIDE {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHeroSlides(
+                        heroSlides.filter((_, i) => i !== index),
+                      )
+                    }
+                    className="flex size-7 items-center justify-center border border-ink/15 text-ink-soft/40 transition-colors hover:border-destructive/40 hover:text-destructive"
+                    aria-label={`حذف الشريحة ${index + 1}`}
+                  >
+                    <Trash2 className="size-3" />
+                  </button>
+                </div>
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <ImageUpload
+                    token={token}
+                    value={slide.imageUrl}
+                    onChange={(imageUrl) => {
+                      const next = [...heroSlides];
+                      next[index] = { ...slide, imageUrl };
+                      setHeroSlides(next);
+                    }}
+                    label="صورة الشريحة"
+                  />
+                  <div className="grid gap-2">
+                    <Field label="السطر الصغير / Kicker">
+                      <Input
+                        value={slide.kicker}
+                        onChange={(event) => {
+                          const next = [...heroSlides];
+                          next[index] = {
+                            ...slide,
+                            kicker: event.target.value,
+                          };
+                          setHeroSlides(next);
+                        }}
+                        className="h-9 rounded-none border-ink/15 bg-card text-[11px]"
+                        dir="ltr"
+                      />
+                    </Field>
+                    <Field label="المنتج المرتبط">
+                      <SelectInput
+                        value={slide.productId ?? ""}
+                        onChange={(productId) => {
+                          const next = [...heroSlides];
+                          next[index] = { ...slide, productId };
+                          setHeroSlides(next);
+                        }}
+                        className="h-9 text-[11px]"
+                      >
+                        <option value="">بدون منتج</option>
+                        {products.map((product) => (
+                          <option key={product._id} value={product.slug}>
+                            {product.name}
+                          </option>
+                        ))}
+                      </SelectInput>
+                    </Field>
+                  </div>
+                </div>
+
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <Field label="رابط فيديو الشريحة (اختياري — MP4)">
+                    <Input
+                      value={slide.videoUrl ?? ""}
+                      onChange={(event) => {
+                        const next = [...heroSlides];
+                        next[index] = {
+                          ...slide,
+                          videoUrl: event.target.value,
+                        };
+                        setHeroSlides(next);
+                      }}
+                      placeholder="https://…/look.mp4"
+                      className="h-9 rounded-none border-ink/15 bg-card text-[10px]"
+                      dir="ltr"
+                    />
+                  </Field>
+                  <Field label="العنوان">
+                    <Input
+                      value={slide.title}
+                      onChange={(event) => {
+                        const next = [...heroSlides];
+                        next[index] = { ...slide, title: event.target.value };
+                        setHeroSlides(next);
+                      }}
+                      className="h-9 rounded-none border-ink/15 bg-card text-[11px]"
+                    />
+                  </Field>
+                  <Field label="الوصف">
+                    <Input
+                      value={slide.subtitle}
+                      onChange={(event) => {
+                        const next = [...heroSlides];
+                        next[index] = {
+                          ...slide,
+                          subtitle: event.target.value,
+                        };
+                        setHeroSlides(next);
+                      }}
+                      className="h-9 rounded-none border-ink/15 bg-card text-[11px]"
+                    />
+                  </Field>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="border border-ink/10 bg-card p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="mono text-[9px] tracking-[0.16em] text-gold">
+                CAMPAIGN BANNER / البانر الإعلاني
+              </p>
+              <p className="mt-1 text-[10px] text-ink-soft/40">
+                يظهر بين الأقسام والكتالوج. يمكنك تعطيله أو تغيير صورته ونصه.
+              </p>
+            </div>
+            <label className="flex items-center gap-2 text-[10px] text-ink-soft/55">
+              <input
+                type="checkbox"
+                checked={banner.enabled}
+                onChange={(event) =>
+                  setBanner({ ...banner, enabled: event.target.checked })
+                }
+                className="size-3.5 accent-[#c5a059]"
+              />
+              مفعّل
+            </label>
+          </div>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <ImageUpload
+              token={token}
+              value={banner.imageUrl}
+              onChange={(imageUrl) => setBanner({ ...banner, imageUrl })}
+              label="صورة البانر"
+            />
+            <div className="grid gap-2">
+              <Field label="السطر العلوي / Eyebrow">
+                <Input
+                  value={banner.eyebrow}
+                  onChange={(event) =>
+                    setBanner({ ...banner, eyebrow: event.target.value })
+                  }
+                  className="h-9 rounded-none border-ink/15 bg-paper-deep text-[11px]"
+                  dir="ltr"
+                />
+              </Field>
+              <Field label="العنوان">
+                <Input
+                  value={banner.title}
+                  onChange={(event) =>
+                    setBanner({ ...banner, title: event.target.value })
+                  }
+                  className="h-9 rounded-none border-ink/15 bg-paper-deep text-[11px]"
+                />
+              </Field>
+            </div>
+          </div>
+          <div className="mt-2 grid gap-3 sm:grid-cols-3">
+            <Field label="النص الفرعي">
+              <Input
+                value={banner.subtitle}
+                onChange={(event) =>
+                  setBanner({ ...banner, subtitle: event.target.value })
+                }
+                className="h-9 rounded-none border-ink/15 bg-paper-deep text-[11px]"
+              />
+            </Field>
+            <Field label="نص الزر">
+              <Input
+                value={banner.ctaLabel}
+                onChange={(event) =>
+                  setBanner({ ...banner, ctaLabel: event.target.value })
+                }
+                className="h-9 rounded-none border-ink/15 bg-paper-deep text-[11px]"
+              />
+            </Field>
+            <Field label="رابط الزر">
+              <Input
+                value={banner.ctaHref}
+                onChange={(event) =>
+                  setBanner({ ...banner, ctaHref: event.target.value })
+                }
+                className="h-9 rounded-none border-ink/15 bg-paper-deep text-start text-[11px]"
+                dir="ltr"
               />
             </Field>
           </div>
@@ -1653,7 +2207,7 @@ function SettingsPanel({
                       };
                       setMethods(next);
                     }}
-                    className="size-3.5 accent-[#d9ff57]"
+                    className="size-3.5 accent-[#c5a059]"
                   />
                   مفعّل
                 </label>
@@ -1791,6 +2345,126 @@ function Field({
       <span className="mb-1 block text-[10px] text-ink-soft/55">{label}</span>
       {children}
     </label>
+  );
+}
+
+function ImageUpload({
+  token,
+  value,
+  onChange,
+  label,
+}: {
+  token: string;
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+}) {
+  const convex = useConvex();
+  const generateUploadUrl = useMutation(api.admin.generateMediaUploadUrl);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFile = async (file: File) => {
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("اختر ملف صورة فقط.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setError("حجم الصورة أكبر من ٨ ميجابايت.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const uploadUrl = await generateUploadUrl({ token });
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      if (!response.ok) throw new Error("تعذّر رفع الصورة.");
+      const payload = (await response.json()) as { storageId?: string };
+      if (!payload.storageId) throw new Error("لم يصل معرّف الصورة.");
+      const url = await convex.query(api.admin.mediaUrl, {
+        token,
+        storageId: payload.storageId as Id<"_storage">,
+      });
+      if (!url) throw new Error("تعذّر تجهيز رابط الصورة.");
+      onChange(url);
+      toast.success("تم رفع الصورة");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "تعذّر رفع الصورة.",
+      );
+    } finally {
+      setIsUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  return (
+    <div>
+      <span className="mb-1 block text-[10px] text-ink-soft/55">{label}</span>
+      <div className="grid grid-cols-[88px_1fr] gap-2">
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden border border-ink/15 bg-paper-deep">
+          {value ? (
+            <img
+              src={value}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <ImagePlus className="size-5 text-ink-soft/25" />
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <Input
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder="https://… أو ارفع صورة"
+            className="h-9 min-w-0 rounded-none border-ink/15 bg-paper-deep text-[10px]"
+            dir="ltr"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={isUploading}
+              className="flex h-8 items-center gap-1.5 border border-gold/40 px-3 text-[9px] text-gold transition-colors hover:bg-gold hover:text-espresso disabled:opacity-50"
+            >
+              <Upload className="size-3" />
+              {isUploading ? "جارٍ الرفع…" : "رفع صورة"}
+            </button>
+            {value && (
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="text-[9px] text-ink-soft/35 transition-colors hover:text-destructive"
+              >
+                إزالة
+              </button>
+            )}
+          </div>
+          {error && (
+            <p className="text-[9px] leading-4 text-destructive">{error}</p>
+          )}
+        </div>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void handleFile(file);
+        }}
+      />
+    </div>
   );
 }
 

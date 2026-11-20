@@ -3,6 +3,7 @@ import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import {
   bookingStatusValidator,
+  categoryInputValidator,
   orderStatusValidator,
   postStatusValidator,
   productInputValidator,
@@ -91,13 +92,19 @@ export const dashboard = query({
       .first();
     if (!settings) throw new Error("بيانات المتجر غير موجودة.");
 
-    const [products, orders, bookings, reviews, posts] = await Promise.all([
-      ctx.db.query("products").withIndex("by_position").collect(),
-      ctx.db.query("orders").withIndex("by_created").order("desc").take(120),
-      ctx.db.query("bookings").order("desc").take(120),
-      ctx.db.query("reviews").order("desc").take(160),
-      ctx.db.query("posts").order("desc").take(120),
-    ]);
+    const [products, categories, orders, bookings, reviews, posts] =
+      await Promise.all([
+        ctx.db.query("products").withIndex("by_position").collect(),
+        ctx.db.query("categories").withIndex("by_position").collect(),
+        ctx.db
+          .query("orders")
+          .withIndex("by_created")
+          .order("desc")
+          .take(120),
+        ctx.db.query("bookings").order("desc").take(120),
+        ctx.db.query("reviews").order("desc").take(160),
+        ctx.db.query("posts").order("desc").take(120),
+      ]);
 
     const postsWithImages = await Promise.all(
       posts.map(async (post) => ({
@@ -122,10 +129,14 @@ export const dashboard = query({
         paymentMethods: settings.paymentMethods,
         footerCredit: settings.footerCredit,
         footerCreditUrl: settings.footerCreditUrl,
+        logoUrl: settings.logoUrl ?? "",
+        heroSlides: settings.heroSlides ?? [],
+        banner: settings.banner ?? null,
         adminEmail: settings.adminEmail,
         updatedAt: settings.updatedAt,
       },
       products,
+      categories,
       orders,
       bookings,
       reviews,
@@ -314,9 +325,110 @@ export const updateSettings = mutation({
       announcement: args.settings.announcement
         .map((line) => line.trim())
         .filter(Boolean),
+      logoUrl: args.settings.logoUrl?.trim() ?? "",
+      heroSlides: args.settings.heroSlides
+        ?.map((slide) => ({
+          ...slide,
+          imageUrl: slide.imageUrl.trim(),
+          videoUrl: slide.videoUrl?.trim() || undefined,
+          title: slide.title.trim(),
+          subtitle: slide.subtitle.trim(),
+          kicker: slide.kicker.trim(),
+          productId: slide.productId?.trim() || undefined,
+        }))
+        .filter((slide) => slide.imageUrl),
+      banner: args.settings.banner
+        ? {
+            ...args.settings.banner,
+            eyebrow: args.settings.banner.eyebrow.trim(),
+            title: args.settings.banner.title.trim(),
+            subtitle: args.settings.banner.subtitle.trim(),
+            imageUrl: args.settings.banner.imageUrl.trim(),
+            ctaLabel: args.settings.banner.ctaLabel.trim(),
+            ctaHref: args.settings.banner.ctaHref.trim() || "/#catalog",
+          }
+        : undefined,
       updatedAt: Date.now(),
     });
     return { ok: true };
+  },
+});
+
+/* ------------------------------- Categories -------------------------------- */
+
+export const saveCategory = mutation({
+  args: {
+    token: v.string(),
+    id: v.optional(v.id("categories")),
+    category: categoryInputValidator,
+  },
+  handler: async (ctx, args) => {
+    await assertAdmin(ctx, args.token);
+
+    const label = args.category.label.trim();
+    const note = args.category.note.trim();
+    const imageUrl = args.category.imageUrl?.trim();
+    if (label.length < 2) throw new Error("اكتب اسماً واضحاً للقسم.");
+
+    if (args.id) {
+      await ctx.db.patch(args.id, { label, note, imageUrl });
+      return args.id;
+    }
+
+    const last = await ctx.db
+      .query("categories")
+      .withIndex("by_position")
+      .order("desc")
+      .first();
+
+    return await ctx.db.insert("categories", {
+      slug: `c-${Date.now().toString(36)}`,
+      label,
+      note,
+      imageUrl,
+      position: (last?.position ?? 0) + 1,
+    });
+  },
+});
+
+export const deleteCategory = mutation({
+  args: { token: v.string(), id: v.id("categories") },
+  handler: async (ctx, args) => {
+    await assertAdmin(ctx, args.token);
+    const category = await ctx.db.get(args.id);
+    if (!category) return { ok: true };
+
+    const usedBy = await ctx.db
+      .query("products")
+      .withIndex("by_position")
+      .collect();
+    const count = usedBy.filter((p) => p.category === category.slug).length;
+    if (count > 0) {
+      throw new Error(
+        `لا يمكن حذف «${category.label}» قبل نقل ${count} منتج إلى قسم آخر.`,
+      );
+    }
+
+    await ctx.db.delete(args.id);
+    return { ok: true };
+  },
+});
+
+/* --------------------------------- Media ----------------------------------- */
+
+export const generateMediaUploadUrl = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    await assertAdmin(ctx, args.token);
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const mediaUrl = query({
+  args: { token: v.string(), storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    await assertAdmin(ctx, args.token);
+    return await ctx.storage.getUrl(args.storageId);
   },
 });
 

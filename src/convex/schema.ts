@@ -6,6 +6,8 @@ import {
   bookingStatusValidator,
   categoryValidator,
   colorValidator,
+  heroSlideValidator,
+  bannerValidator,
   kindValidator,
   orderStatusValidator,
   paymentMethodValidator,
@@ -57,6 +59,18 @@ const schema = defineSchema(
       badge: v.optional(badgeValidator),
       inStock: v.boolean(),
       keywords: v.array(v.string()),
+      imageUrl: v.optional(v.string()),
+      secondImageUrl: v.optional(v.string()),
+      position: v.number(),
+    })
+      .index("by_slug", ["slug"])
+      .index("by_position", ["position"]),
+
+    categories: defineTable({
+      slug: v.string(),
+      label: v.string(),
+      note: v.string(),
+      imageUrl: v.optional(v.string()),
       position: v.number(),
     })
       .index("by_slug", ["slug"])
@@ -139,8 +153,12 @@ const schema = defineSchema(
       paymentMethods: v.array(paymentMethodValidator),
       footerCredit: v.string(),
       footerCreditUrl: v.string(),
+      logoUrl: v.optional(v.string()),
+      heroSlides: v.optional(v.array(heroSlideValidator)),
+      banner: v.optional(bannerValidator),
       adminEmail: v.string(),
       adminPassword: v.string(),
+      seedVersion: v.optional(v.number()),
       updatedAt: v.number(),
     }).index("by_key", ["key"]),
 

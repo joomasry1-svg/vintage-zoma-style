@@ -1,7 +1,13 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { PRODUCTS, STORE } from "../../src/data/store";
+import {
+  CATEGORIES,
+  DEFAULT_BANNER,
+  DEFAULT_HERO_SLIDES,
+  PRODUCTS,
+  STORE,
+} from "../../src/data/store";
 
 const ADMIN_EMAIL = "ye360057@gmail.com";
 const ADMIN_PASSWORD = "12345678910";
@@ -23,6 +29,74 @@ export const ensureSeed = mutation({
       .first();
 
     if (settings) {
+      // One-time migration for stores created before the winter photo edit.
+      // A version marker keeps deleted products/categories from coming back.
+      if ((settings.seedVersion ?? 0) < 2) {
+        await ctx.db.patch(settings._id, {
+          logoUrl: settings.logoUrl ?? "",
+          heroSlides: settings.heroSlides ?? DEFAULT_HERO_SLIDES,
+          banner: settings.banner ?? DEFAULT_BANNER,
+          seedVersion: 2,
+          updatedAt: Date.now(),
+        });
+
+        const existingCategories = await ctx.db
+          .query("categories")
+          .withIndex("by_position")
+          .first();
+        if (!existingCategories) {
+          let categoryPosition = 0;
+          for (const category of CATEGORIES) {
+            await ctx.db.insert("categories", {
+              slug: category.id,
+              label: category.label,
+              note: category.note,
+              imageUrl: category.imageUrl,
+              position: categoryPosition,
+            });
+            categoryPosition += 1;
+          }
+        }
+
+        const existingProducts = await ctx.db.query("products").collect();
+        const bySlug = new Map(existingProducts.map((p) => [p.slug, p]));
+        let lastPosition = existingProducts.reduce(
+          (max, product) => Math.max(max, product.position),
+          0,
+        );
+
+        for (const product of PRODUCTS) {
+          const stored = bySlug.get(product.id);
+          if (!stored) {
+            lastPosition += 1;
+            await ctx.db.insert("products", {
+              slug: product.id,
+              name: product.name,
+              category: product.category,
+              kind: product.kind,
+              description: product.description,
+              fabric: product.fabric,
+              price: product.price,
+              discount: product.discount,
+              sizes: product.sizes,
+              colors: product.colors,
+              tone: product.tone,
+              badge: product.badge,
+              inStock: product.inStock,
+              keywords: product.keywords,
+              imageUrl: product.imageUrl,
+              secondImageUrl: product.secondImageUrl,
+              position: lastPosition,
+            });
+          } else if (!stored.imageUrl && product.imageUrl) {
+            await ctx.db.patch(stored._id, {
+              imageUrl: product.imageUrl,
+              secondImageUrl: product.secondImageUrl,
+            });
+          }
+        }
+      }
+
       return { ok: true, seeded: false };
     }
 
@@ -38,41 +112,76 @@ export const ensureSeed = mutation({
       paymentMethods: STORE.paymentMethods,
       footerCredit: STORE.footerCredit,
       footerCreditUrl: STORE.footerCreditUrl,
+      logoUrl: "",
+      heroSlides: DEFAULT_HERO_SLIDES,
+      banner: DEFAULT_BANNER,
       adminEmail: ADMIN_EMAIL,
       adminPassword: ADMIN_PASSWORD,
+      seedVersion: 2,
       updatedAt: Date.now(),
     });
 
-    const firstProduct = await ctx.db
-      .query("products")
-      .withIndex("by_position")
-      .first();
+    let categoryPosition = 0;
+    for (const category of CATEGORIES) {
+      await ctx.db.insert("categories", {
+        slug: category.id,
+        label: category.label,
+        note: category.note,
+        imageUrl: category.imageUrl,
+        position: categoryPosition,
+      });
+      categoryPosition += 1;
+    }
 
-    if (!firstProduct) {
-      let position = 0;
-      for (const product of PRODUCTS) {
-        await ctx.db.insert("products", {
-          slug: product.id,
-          name: product.name,
-          category: product.category,
-          kind: product.kind,
-          description: product.description,
-          fabric: product.fabric,
-          price: product.price,
-          discount: product.discount,
-          sizes: product.sizes,
-          colors: product.colors,
-          tone: product.tone,
-          badge: product.badge,
-          inStock: product.inStock,
-          keywords: product.keywords,
-          position,
-        });
-        position += 1;
-      }
+    let position = 0;
+    for (const product of PRODUCTS) {
+      await ctx.db.insert("products", {
+        slug: product.id,
+        name: product.name,
+        category: product.category,
+        kind: product.kind,
+        description: product.description,
+        fabric: product.fabric,
+        price: product.price,
+        discount: product.discount,
+        sizes: product.sizes,
+        colors: product.colors,
+        tone: product.tone,
+        badge: product.badge,
+        inStock: product.inStock,
+        keywords: product.keywords,
+        imageUrl: product.imageUrl,
+        secondImageUrl: product.secondImageUrl,
+        position,
+      });
+      position += 1;
     }
 
     return { ok: true, seeded: true };
+  },
+});
+
+export const listCategories = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db
+      .query("categories")
+      .withIndex("by_position")
+      .collect();
+
+    // Before the very first seed, show the launch menu so the site is usable.
+    if (rows.length === 0) {
+      return CATEGORIES.map((category, position) => ({
+        _id: `seed-${category.id}`,
+        slug: category.id,
+        label: category.label,
+        note: category.note,
+        imageUrl: category.imageUrl,
+        position,
+      }));
+    }
+
+    return rows;
   },
 });
 
@@ -117,6 +226,12 @@ export const getSettings = query({
       paymentMethods: settings.paymentMethods,
       footerCredit: settings.footerCredit,
       footerCreditUrl: settings.footerCreditUrl,
+      logoUrl: settings.logoUrl ?? "",
+      heroSlides:
+        settings.heroSlides && settings.heroSlides.length > 0
+          ? settings.heroSlides
+          : DEFAULT_HERO_SLIDES,
+      banner: settings.banner ?? DEFAULT_BANNER,
     };
   },
 });

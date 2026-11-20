@@ -71,6 +71,8 @@ export function GarmentPlate({ kind, tone, className }: PlateProps) {
 
   const render = () => {
     switch (kind) {
+      case "coat":
+      case "jacket":
       case "suit":
       case "blazer": {
         const isBlazer = kind === "blazer";

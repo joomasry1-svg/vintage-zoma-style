@@ -1,16 +1,16 @@
 import { v } from "convex/values";
 
-export const categoryValidator = v.union(
-  v.literal("suits"),
-  v.literal("blazers"),
-  v.literal("shirts"),
-  v.literal("polos"),
-  v.literal("trousers"),
-  v.literal("shoes"),
-  v.literal("accessories"),
-);
+export const categoryValidator = v.string();
+
+export const categoryInputValidator = v.object({
+  label: v.string(),
+  note: v.string(),
+  imageUrl: v.optional(v.string()),
+});
 
 export const kindValidator = v.union(
+  v.literal("coat"),
+  v.literal("jacket"),
   v.literal("suit"),
   v.literal("blazer"),
   v.literal("shirt"),
@@ -43,6 +43,8 @@ export const productInputValidator = v.object({
   badge: v.optional(badgeValidator),
   inStock: v.boolean(),
   keywords: v.array(v.string()),
+  imageUrl: v.optional(v.string()),
+  secondImageUrl: v.optional(v.string()),
 });
 
 export const orderStatusValidator = v.union(
@@ -73,6 +75,25 @@ export const paymentMethodValidator = v.object({
   enabled: v.boolean(),
 });
 
+export const heroSlideValidator = v.object({
+  imageUrl: v.string(),
+  videoUrl: v.optional(v.string()),
+  title: v.string(),
+  subtitle: v.string(),
+  kicker: v.string(),
+  productId: v.optional(v.string()),
+});
+
+export const bannerValidator = v.object({
+  enabled: v.boolean(),
+  eyebrow: v.string(),
+  title: v.string(),
+  subtitle: v.string(),
+  imageUrl: v.string(),
+  ctaLabel: v.string(),
+  ctaHref: v.string(),
+});
+
 export const settingsInputValidator = v.object({
   storeName: v.string(),
   tagline: v.string(),
@@ -84,4 +105,7 @@ export const settingsInputValidator = v.object({
   paymentMethods: v.array(paymentMethodValidator),
   footerCredit: v.string(),
   footerCreditUrl: v.string(),
+  logoUrl: v.optional(v.string()),
+  heroSlides: v.optional(v.array(heroSlideValidator)),
+  banner: v.optional(bannerValidator),
 });

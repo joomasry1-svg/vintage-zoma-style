@@ -52,13 +52,21 @@ export function SiteHeader() {
             className="flex shrink-0 flex-col items-start leading-none"
             aria-label={settings.storeName}
           >
-            <span className="mono text-[24px] font-medium tracking-[0.22em] text-ink">
-              ZOMA
-            </span>
-            <span className="mono mt-1 flex items-center gap-1.5 text-[7.5px] tracking-[0.22em] text-ink-soft/50">
-              STORE
-              <span className="inline-block size-1 bg-gold" />
-              CAIRO
+            {settings.logoUrl ? (
+              <img
+                src={settings.logoUrl}
+                alt={settings.storeName}
+                className="h-8 w-auto max-w-[130px] object-contain sm:h-9"
+              />
+            ) : (
+              <span className="mono text-[24px] font-medium tracking-[0.22em] text-ink">
+                ZOMA
+              </span>
+            )}
+            <span className="mono mt-1 flex max-w-[140px] items-center gap-1.5 truncate text-[7.5px] tracking-[0.16em] text-gold/75">
+              {settings.storeName}
+              <span className="inline-block size-1 shrink-0 bg-gold" />
+              {settings.city.split("·")[0]?.trim() || "CAIRO"}
             </span>
           </Link>
 
@@ -203,13 +211,7 @@ export function SiteHeader() {
             >
               {settings.phoneDisplay}
             </a>
-            <Link
-              to="/admin"
-              onClick={() => setMenuOpen(false)}
-              className="mono text-center text-[8px] tracking-[0.2em] text-ink-soft/30"
-            >
-              STORE ADMIN
-            </Link>
+
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -253,13 +255,15 @@ function AnnouncementMarquee() {
 }
 
 function HeaderSearch() {
-  const { products } = useStore();
+  const { products, categories } = useStore();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const results = query.trim() ? searchProducts(products, query).slice(0, 4) : [];
+  const results = query.trim()
+    ? searchProducts(products, query, categories).slice(0, 4)
+    : [];
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -327,19 +331,28 @@ function HeaderSearch() {
                       }}
                       className="flex w-full items-center gap-3 px-3 py-2.5 text-start transition-colors hover:bg-paper-deep"
                     >
-                      <ProductPlate
-                        kind={product.kind}
-                        tone={product.tone}
-                        className="size-11 shrink-0 border border-ink/10"
-                        plateClassName="p-1"
-                        framed={false}
-                      />
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt=""
+                          loading="lazy"
+                          className="size-11 shrink-0 border border-ink/10 object-cover"
+                        />
+                      ) : (
+                        <ProductPlate
+                          kind={product.kind}
+                          tone={product.tone}
+                          className="size-11 shrink-0 border border-ink/10"
+                          plateClassName="p-1"
+                          framed={false}
+                        />
+                      )}
                       <span className="flex min-w-0 flex-1 flex-col">
                         <span className="truncate text-[12px] leading-5 text-ink">
                           {product.name}
                         </span>
                         <span className="mono text-[8px] tracking-[0.12em] text-ink-soft/40">
-                          {categoryLabel(product.category)}
+                          {categoryLabel(product.category, categories)}
                         </span>
                       </span>
                       <span className="mono shrink-0 text-[10px] text-ink">

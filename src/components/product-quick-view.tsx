@@ -8,7 +8,7 @@ import {
   priceOf,
   whatsappLink,
 } from "@/lib/store-helpers";
-import { ProductPlate } from "@/components/garment-plate";
+import { ProductVisual } from "@/components/product-visual";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ export function ProductQuickView({
     qty: number;
   }) => void;
 }) {
-  const { settings } = useStore();
+  const { settings, categories } = useStore();
   const [size, setSize] = useState("");
   const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
@@ -77,19 +77,22 @@ export function ProductQuickView({
         <div className="grid gap-0 md:grid-cols-2">
           <div className="relative border-b border-ink/10 md:border-b-0 md:border-e">
             <div className="relative overflow-hidden">
-              <ProductPlate
-                kind={product.kind}
-                tone={activeColor?.hex ?? product.tone}
+              <ProductVisual
+                product={product}
                 className="aspect-square w-full md:aspect-auto md:h-full md:min-h-[480px]"
+                imageClassName={cn(
+                  "transition-transform duration-700 ease-out",
+                  zoom && "scale-[1.75]",
+                )}
                 plateClassName={cn(
                   "p-10 transition-transform duration-700 ease-out",
                   zoom && "scale-[1.75]",
                 )}
               >
-                <span className="mono absolute bottom-4 start-4 text-[7px] tracking-[0.2em] text-[#211c17]/40">
-                  ZOMA ARCHIVE PLATE
+                <span className="mono absolute bottom-4 start-4 z-10 text-[7px] tracking-[0.2em] text-white/60">
+                  ZOMA WINTER EDIT
                 </span>
-              </ProductPlate>
+              </ProductVisual>
               <button
                 type="button"
                 onClick={() => setZoom((current) => !current)}
@@ -107,7 +110,7 @@ export function ProductQuickView({
                 QUICK VIEW / {product.kind.toUpperCase()}
               </p>
               <p className="text-[10px] text-ink-soft/50">
-                {categoryLabel(product.category)}
+                {categoryLabel(product.category, categories)}
               </p>
             </div>
             <DialogTitle className="mt-2 text-2xl font-semibold leading-snug text-ink">

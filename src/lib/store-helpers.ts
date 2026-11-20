@@ -2,6 +2,7 @@ import {
   CATEGORIES,
   type CategoryId,
   type Product,
+  type StoreCategory,
 } from "@/data/store";
 import type { CartLine } from "@/hooks/use-cart";
 
@@ -23,8 +24,11 @@ export function formatPrice(value: number) {
   return `${value.toLocaleString("en-US")} ج.م`;
 }
 
-export function categoryLabel(id: CategoryId) {
-  return CATEGORIES.find((category) => category.id === id)?.label ?? "";
+export function categoryLabel(
+  id: CategoryId,
+  categories: StoreCategory[] = CATEGORIES,
+) {
+  return categories.find((category) => category.id === id)?.label ?? id;
 }
 
 const ARABIC_DIACRITICS = /[\u064B-\u0652\u0670\u0640]/g;
@@ -43,10 +47,16 @@ export function normalizeArabic(input: string) {
     .trim();
 }
 
-function searchScore(product: Product, tokens: string[]) {
+function searchScore(
+  product: Product,
+  tokens: string[],
+  categories: StoreCategory[],
+) {
   const name = normalizeArabic(product.name);
   const keywords = normalizeArabic(product.keywords.join(" "));
-  const category = normalizeArabic(categoryLabel(product.category));
+  const category = normalizeArabic(
+    categoryLabel(product.category, categories),
+  );
   const description = normalizeArabic(product.description);
   const fabric = normalizeArabic(product.fabric);
 
@@ -63,11 +73,18 @@ function searchScore(product: Product, tokens: string[]) {
   return score;
 }
 
-export function searchProducts(products: Product[], query: string) {
+export function searchProducts(
+  products: Product[],
+  query: string,
+  categories: StoreCategory[] = CATEGORIES,
+) {
   const tokens = normalizeArabic(query).split(" ").filter(Boolean);
   if (!tokens.length) return [];
   return products
-    .map((product) => ({ product, score: searchScore(product, tokens) }))
+    .map((product) => ({
+      product,
+      score: searchScore(product, tokens, categories),
+    }))
     .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score)
     .map((entry) => entry.product);
@@ -80,16 +97,23 @@ export function filterProducts(
     query?: string;
     sort?: SortId;
     maxPrice?: number;
+    categories?: StoreCategory[];
   } = {},
 ) {
-  const { category = "all", query = "", sort = "featured", maxPrice } = options;
+  const {
+    category = "all",
+    query = "",
+    sort = "featured",
+    maxPrice,
+    categories = CATEGORIES,
+  } = options;
 
   let result = products.filter((product) =>
     category === "all" ? true : product.category === category,
   );
 
   if (query.trim()) {
-    const ranked = searchProducts(products, query);
+    const ranked = searchProducts(products, query, categories);
     const order = new Map(ranked.map((product, index) => [product.id, index]));
     result = result
       .filter((product) => order.has(product.id))
