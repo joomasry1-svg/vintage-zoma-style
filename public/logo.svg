@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#f4ecdd"/>
+  <rect x="26" y="26" width="460" height="460" fill="none" stroke="#211c17" stroke-width="5"/>
+  <rect x="42" y="42" width="428" height="428" fill="none" stroke="#a9884f" stroke-width="2"/>
+  <path d="M150 142 H362 V184 H150 Z" fill="#211c17"/>
+  <path d="M328 184 H362 L184 330 H150 Z" fill="#211c17"/>
+  <path d="M150 330 H362 V372 H150 Z" fill="#211c17"/>
+  <text x="256" y="432" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="30" letter-spacing="12" fill="#8a7050">ZOMA</text>
+</svg>
