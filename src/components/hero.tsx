@@ -149,15 +149,16 @@ export function Hero({
               تسوّق تشكيلة الشتاء
               <ArrowUpLeft className="size-4 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
-            <Link
-              to="/booking"
+            <button
+              type="button"
+              onClick={() => onShop("all")}
               className="group flex h-12 items-center justify-center gap-2.5 border border-ink/20 px-6 text-[11px] text-ink/85 backdrop-blur transition-colors hover:border-gold/60 hover:text-gold"
             >
-              احجز جلسة قياس
+              استعرض كل القطع
               <span className="mono text-[8px] tracking-[0.12em] text-gold">
-                30 MIN
+                ALL
               </span>
-            </Link>
+            </button>
           </div>
 
           <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-ink/10 pt-5">

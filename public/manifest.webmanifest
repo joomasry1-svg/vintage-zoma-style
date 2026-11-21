@@ -1,7 +1,7 @@
 {
   "name": "Zoma store — ملابس رجالية مختارة",
   "short_name": "Zoma store",
-  "description": "تسوّق المعاطف والبدلات والقمصان، احجز جلسة قياس، واطلب عبر واتساب.",
+  "description": "تسوّق المعاطف والبدلات والقمصان، واطلب عبر واتساب."
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fbf7f2",

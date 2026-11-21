@@ -33,7 +33,6 @@ import {
 const NAV_LINKS = [
   { to: "/?view=catalog#catalog", label: "المتجر" },
   { to: "/lookbook", label: "المجتمع" },
-  { to: "/booking", label: "المواعيد" },
 ];
 
 export function SiteHeader() {
@@ -166,7 +165,7 @@ export function SiteHeader() {
             </p>
             <SheetTitle className="text-xl text-ink">إلى أين تريد الذهاب؟</SheetTitle>
             <SheetDescription className="text-[11px] leading-5 text-ink-soft/60">
-              تصفح المتجر، شارك إطلالتك، أو احجز موعد قياس في الاستوديو.
+              تصفح المتجر، أو شارك إطلالتك في مجتمع Zoma.
             </SheetDescription>
           </SheetHeader>
 
@@ -174,7 +173,6 @@ export function SiteHeader() {
             {[
               { label: "المتجر", to: "/?view=catalog#catalog" },
               { label: "المجتمع", to: "/lookbook" },
-              { label: "المواعيد", to: "/booking" },
               {
                 label: isAuthenticated ? "حسابي" : "تسجيل الدخول",
                 to: isAuthenticated
@@ -208,7 +206,7 @@ export function SiteHeader() {
             </div>
             <a
               href={whatsappLink(
-                "مرحباً Zoma، أحتاج مساعدة في اختيار قطعة أو حجز موعد.",
+                "مرحباً Zoma، أحتاج مساعدة في اختيار قطعة.",
                 settings.whatsapp,
               )}
               target="_blank"

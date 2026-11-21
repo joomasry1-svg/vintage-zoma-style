@@ -2,7 +2,6 @@ import { Link } from "react-router";
 import { useStore } from "@/context/store-context";
 import { whatsappLink } from "@/lib/store-helpers";
 import {
-  ArrowUpLeft,
   Clock,
   Lock,
   Mail,
@@ -117,15 +116,6 @@ export function StoreFooter() {
             <ul className="mt-4 space-y-3 text-[12px] text-ink-soft/75">
               <li>
                 <Link
-                  to="/booking"
-                  className="inline-flex items-center gap-1.5 transition-colors hover:text-gold"
-                >
-                  حجز جلسة قياس
-                  <ArrowUpLeft className="size-3 text-gold" />
-                </Link>
-              </li>
-              <li>
-                <Link
                   to="/dashboard"
                   className="transition-colors hover:text-gold"
                 >
@@ -186,9 +176,6 @@ export function StoreFooter() {
             © {year} {settings.storeName}. جميع الحقوق محفوظة.
           </p>
           <div className="flex flex-wrap items-center gap-4 text-[10px] text-ink-soft/40">
-            <Link to="/booking" className="transition-colors hover:text-ink">
-              المواعيد
-            </Link>
             <Link to="/lookbook" className="transition-colors hover:text-ink">
               المجتمع
             </Link>

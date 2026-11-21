@@ -19,13 +19,13 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   ArrowUpLeft,
-  CalendarDays,
   Check,
   Loader2,
   Maximize2,
   MessageCircle,
   Minus,
   Plus,
+  Ruler,
   ShieldCheck,
   Star,
   Truck,
@@ -368,7 +368,7 @@ export default function ProductDetail() {
               {[
                 { icon: Truck, title: "توصيل ٢–٤ أيام", note: "لكل محافظات مصر" },
                 { icon: ShieldCheck, title: "استبدال ١٤ يوماً", note: "بدون تعقيد" },
-                { icon: CalendarDays, title: "جلسة قياس", note: "٣٠ دقيقة مجاناً" },
+                { icon: Ruler, title: "دليل قياس دقيق", note: "بالسنتيمتر لكل مقاس" },
               ].map((service) => (
                 <div key={service.title} className="flex items-start gap-2.5">
                   <service.icon

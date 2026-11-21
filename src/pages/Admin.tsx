@@ -1420,10 +1420,9 @@ function BookingsPanel({
   return (
     <div>
       <p className="mono text-[9px] tracking-[0.18em] text-gold">FITTINGS</p>
-      <h1 className="mt-2 text-3xl">مواعيد القياس</h1>
+      <h1 className="mt-2 text-3xl">أرشيف المواعيد</h1>
       <p className="mt-1 text-[11px] text-ink-soft/45">
-        الحجوزات القادمة من صفحة المواعيد. أكّد الموعد أو ألغِه ليتحدّث في حساب
-        العميل.
+        حجوزات القياس السابقة محفوظة هنا. يمكنك تأكيدها أو إلغاؤها أو حذفها.
       </p>
 
       <div className="mt-5 space-y-3">

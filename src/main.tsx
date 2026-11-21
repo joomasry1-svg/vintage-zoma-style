@@ -6,7 +6,7 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router";
 import { StoreProvider } from "@/context/store-context";
 import { ThemeProvider, useTheme } from "@/context/theme-context";
 import { CartSheet } from "@/components/cart-sheet";
@@ -16,7 +16,6 @@ import "./index.css";
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail.tsx"));
 const Lookbook = lazy(() => import("./pages/Lookbook.tsx"));
-const Booking = lazy(() => import("./pages/Booking.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
@@ -143,7 +142,10 @@ createRoot(document.getElementById("root")!).render(
                   <Route path="/" element={<Landing />} />
                   <Route path="/product/:slug" element={<ProductDetail />} />
                   <Route path="/lookbook" element={<Lookbook />} />
-                  <Route path="/booking" element={<Booking />} />
+                  <Route
+                    path="/booking"
+                    element={<Navigate to="/" replace />}
+                  />
                   <Route
                     path="/auth"
                     element={<AuthPage redirectAfterAuth="/dashboard" />}

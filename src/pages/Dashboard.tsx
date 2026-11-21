@@ -4,8 +4,6 @@ import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { useStore } from "@/context/store-context";
 import {
-  BOOKING_STATUS_LABELS,
-  formatBookingDate,
   formatDate,
   formatDateTime,
   formatPrice,
@@ -17,7 +15,6 @@ import { SiteLayout } from "@/components/site-layout";
 import { cn } from "@/lib/utils";
 import {
   ArrowUpLeft,
-  CalendarDays,
   Camera,
   LogOut,
   MessageCircle,
@@ -43,7 +40,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const orders = useQuery(api.store.myOrders) ?? [];
-  const bookings = useQuery(api.store.myBookings) ?? [];
   const posts = useQuery(api.store.myPosts) ?? [];
   const reviews = useQuery(api.store.myReviews) ?? [];
 
@@ -78,7 +74,7 @@ export default function Dashboard() {
                 </h1>
                 <p className="mt-1 text-[10.5px] text-ink-soft/45">
                   {user?.email ??
-                    "حساب زائر — يمكنك متابعة الطلبات والمواعيد من هنا."}
+                    "حساب زائر — يمكنك متابعة الطلبات من هنا."}
                 </p>
               </div>
             </div>
@@ -96,11 +92,10 @@ export default function Dashboard() {
 
       <section className="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
               { label: "الطلبات", value: String(orders.length).padStart(2, "0") },
               { label: "إجمالي المشتريات", value: formatPrice(totalSpent) },
-              { label: "المواعيد", value: String(bookings.length).padStart(2, "0") },
               { label: "مشاركات المجتمع", value: String(posts.length).padStart(2, "0") },
             ].map((stat) => (
               <div key={stat.label} className="border border-ink/10 bg-card p-4">
@@ -114,10 +109,9 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {[
               { to: "/#catalog", label: "تصفح الكتالوج", icon: Store },
-              { to: "/booking", label: "احجز جلسة قياس", icon: CalendarDays },
               { to: "/lookbook#share", label: "شارك إطلالتك", icon: Camera },
             ].map((action) => (
               <Link
@@ -222,66 +216,6 @@ export default function Dashboard() {
                 )}
               </div>
 
-              <div className="mt-8">
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="mono text-[9px] tracking-[0.18em] text-gold">
-                      APPOINTMENTS
-                    </p>
-                    <h2 className="mt-2 text-2xl text-ink">مواعيدك</h2>
-                  </div>
-                  <Link
-                    to="/booking"
-                    className="text-[10px] text-ink-soft/45 transition-colors hover:text-gold"
-                  >
-                    حجز موعد جديد
-                  </Link>
-                </div>
-
-                <div className="mt-4 space-y-3">
-                  {bookings.length === 0 ? (
-                    <EmptyState
-                      icon={CalendarDays}
-                      title="لا توجد مواعيد قياس"
-                      copy="احجز ٣٠ دقيقة في الاستوديو لضبط مقاسك وتجربة القطع قبل الشراء."
-                      action={
-                        <Link
-                          to="/booking"
-                          className="bg-gold px-4 py-2.5 text-[10px] font-medium text-espresso"
-                        >
-                          احجز جلسة
-                        </Link>
-                      }
-                    />
-                  ) : (
-                    bookings.map((booking) => (
-                      <div
-                        key={booking._id}
-                        className="flex flex-wrap items-center justify-between gap-3 border border-ink/10 bg-card px-4 py-3"
-                      >
-                        <div>
-                          <p className="text-[12px] font-medium text-ink">
-                            {booking.service}
-                          </p>
-                          <p className="mono mt-1 text-[9px] text-ink-soft/40">
-                            {formatBookingDate(booking.date)} · {booking.time}
-                          </p>
-                        </div>
-                        <span
-                          className={cn(
-                            "mono border px-2 py-1 text-[8px]",
-                            STATUS_STYLES[booking.status] ??
-                              "border-ink/15 text-ink-soft/50",
-                          )}
-                        >
-                          {BOOKING_STATUS_LABELS[booking.status] ??
-                            booking.status}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
             </div>
 
             <aside className="space-y-3">

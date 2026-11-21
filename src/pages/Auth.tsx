@@ -120,13 +120,13 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               <span className="block text-gold">كل تفاصيلك في مكان واحد.</span>
             </h1>
             <p className="mt-4 text-[12px] leading-7 text-ink-soft/60">
-              احفظ طلباتك، تابع مواعيد القياس، وشارك إطلالتك في المجتمع. الدخول
-              بالبريد لا يحتاج كلمة مرور.
+              احفظ طلباتك، وشارك إطلالتك في المجتمع. الدخول بالبريد لا يحتاج
+              كلمة مرور.
             </p>
 
             <ul className="mt-7 space-y-3">
               {[
-                { icon: ShieldCheck, text: "طلباتك ومواعيدك محفوظة" },
+                { icon: ShieldCheck, text: "طلباتك محفوظة في مكان واحد" },
                 { icon: Sparkles, text: "وصول مبكر لقطع الموسم" },
                 { icon: MessageCircle, text: "دعم مباشر على واتساب" },
               ].map((item) => (
@@ -337,7 +337,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   العودة إلى المتجر
                 </Link>
                 <p className="mt-3 text-[9px] leading-5 text-ink-soft/25">
-                  نحتفظ ببيانات حسابك لتأكيد الطلبات والمواعيد فقط. لا نشاركها
+                  نحتفظ ببيانات حسابك لتأكيد الطلبات فقط. لا نشاركها
                   مع أطراف أخرى.
                 </p>
               </div>

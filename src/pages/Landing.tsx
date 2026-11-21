@@ -74,7 +74,7 @@ const PILLARS = [
     icon: MessageCircle,
     index: "04",
     title: "استشارة حقيقية",
-    note: "فريق يرد على واتساب ويحجز جلسة قياس مجانية.",
+    note: "فريق يرد على واتساب ويساعدك في اختيار المقاس المناسب.",
   },
 ];
 
@@ -721,7 +721,7 @@ function CategoryChip({
 
 function HomeMarquee() {
   const items = [
-    "FREE PERSONAL FITTING",
+    "PERSONAL SIZE CONSULTATION",
     "WINTER 26 — LIMITED DROP",
     "CAIRO / MILANO TAILORING",
     "48H DISPATCH",
@@ -940,13 +940,6 @@ function StorySection() {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-2">
-            <Link
-              to="/booking"
-              className="flex h-11 items-center gap-2 border border-gold/40 px-5 text-[10.5px] text-gold transition-colors hover:bg-gold hover:text-espresso"
-            >
-              احجز جلسة قياس
-              <ArrowUpLeft className="size-3.5" />
-            </Link>
             <button
               type="button"
               onClick={() => {
@@ -954,7 +947,7 @@ function StorySection() {
                   .getElementById("catalog")
                   ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
-              className="flex h-11 items-center gap-2 border border-ink/15 px-5 text-[10.5px] text-ink/80 transition-colors hover:border-ink/40 hover:text-ink"
+              className="flex h-11 items-center gap-2 border border-gold/40 px-5 text-[10.5px] text-gold transition-colors hover:bg-gold hover:text-espresso"
             >
               تصفّح الكتالوج
             </button>
