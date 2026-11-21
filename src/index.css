@@ -107,6 +107,52 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Ivory daylight: warm white surfaces, scarlet accent, oxblood ink */
+html.theme-ivory {
+  --paper: #fbf7f2;
+  --paper-deep: #f4ebe2;
+  --ink: #1d1310;
+  --ink-soft: #6d5a52;
+  --sepia: #8b7267;
+  --gold: #b4232b;
+  --gold-soft: #d74a4f;
+  --espresso: #fff8f1;
+  --stage: #efe3d8;
+  --signal-blue: #3f6378;
+  --signal-orange: #b84a1d;
+
+  --background: #fbf7f2;
+  --foreground: #1d1310;
+  --card: #fffdfa;
+  --card-foreground: #1d1310;
+  --popover: #fffdfa;
+  --popover-foreground: #1d1310;
+  --primary: #b4232b;
+  --primary-foreground: #fff8f1;
+  --secondary: #f3e7dc;
+  --secondary-foreground: #1d1310;
+  --muted: #f4ece4;
+  --muted-foreground: #7b655c;
+  --accent: #f8e3d8;
+  --accent-foreground: #1d1310;
+  --destructive: #7d1d15;
+  --border: #e7d8cc;
+  --input: #dfcdc0;
+  --ring: #b4232b;
+  color-scheme: light;
+}
+
+html.theme-ivory ::selection {
+  background: #b4232b;
+  color: #fff8f1;
+}
+
+html.theme-ivory .catalog-light {
+  --gold: #b4232b;
+  --gold-soft: #d74a4f;
+  --espresso: #fff8f1;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -147,12 +193,14 @@
   }
   html {
     scroll-behavior: smooth;
+    background: var(--paper);
   }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    transition: background-color 350ms ease, color 350ms ease;
   }
   h1,
   h2,
@@ -186,11 +234,113 @@
 .canvas-dark {
   background-color: var(--paper);
   background-image:
-    radial-gradient(90% 55% at 76% 0%, rgba(197, 160, 89, 0.13), transparent 62%),
+    radial-gradient(90% 55% at 76% 0%, color-mix(in srgb, var(--gold) 13%, transparent), transparent 62%),
     radial-gradient(65% 50% at 0% 35%, rgba(255, 255, 255, 0.045), transparent 70%),
     linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
   background-size: auto, auto, 96px 96px, 96px 96px;
+}
+
+html.theme-ivory .canvas-dark {
+  background-image:
+    radial-gradient(90% 55% at 76% 0%, rgba(180, 35, 43, 0.11), transparent 62%),
+    radial-gradient(65% 50% at 0% 35%, rgba(255, 252, 246, 0.85), transparent 70%),
+    linear-gradient(rgba(29, 19, 16, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 19, 16, 0.035) 1px, transparent 1px);
+}
+
+html.theme-ivory .grain-overlay {
+  opacity: 0.16;
+}
+
+.announcement-bar {
+  background: #080808;
+  color: #f8f1e8;
+}
+
+html.theme-ivory .announcement-bar {
+  background: linear-gradient(90deg, #741017, #a3161f 48%, #741017);
+  color: #fff8f1;
+}
+
+/* Campaign banner: dark glass in obsidian, ivory wash in daylight. */
+.campaign-overlay {
+  background: linear-gradient(
+    to left,
+    rgba(10, 10, 10, 0.97),
+    rgba(10, 10, 10, 0.76) 42%,
+    rgba(10, 10, 10, 0.28)
+  );
+}
+
+.campaign-image {
+  opacity: 0.42;
+}
+
+html.theme-ivory .campaign-overlay {
+  background: linear-gradient(
+    to left,
+    #fbf7f2,
+    rgba(251, 247, 242, 0.9) 44%,
+    rgba(251, 247, 242, 0.32)
+  );
+}
+
+html.theme-ivory .campaign-image {
+  opacity: 0.3;
+}
+
+.campaign-glow {
+  background: radial-gradient(
+    70% 120% at 80% 50%,
+    rgba(197, 160, 89, 0.18),
+    transparent 60%
+  );
+}
+
+html.theme-ivory .campaign-glow {
+  background: radial-gradient(
+    70% 120% at 80% 50%,
+    rgba(180, 35, 43, 0.13),
+    transparent 60%
+  );
+}
+
+.hero-atmosphere {
+  background:
+    radial-gradient(
+      68% 62% at 78% 34%,
+      color-mix(in srgb, var(--gold) 18%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(40% 40% at 12% 8%, rgba(255, 255, 255, 0.05), transparent 70%);
+}
+
+html.theme-ivory .hero-atmosphere {
+  background:
+    radial-gradient(68% 62% at 78% 34%, rgba(180, 35, 43, 0.15), transparent 68%),
+    radial-gradient(42% 42% at 10% 8%, rgba(255, 255, 255, 0.9), transparent 72%);
+}
+
+.hero-image-fade {
+  background: linear-gradient(
+    to left,
+    transparent,
+    color-mix(in srgb, var(--paper) 55%, transparent),
+    var(--paper)
+  );
+}
+
+.hero-bottom-fade {
+  background: linear-gradient(to top, var(--paper), transparent);
+}
+
+.hero-primary-cta {
+  box-shadow: 0 18px 45px -22px color-mix(in srgb, var(--gold) 80%, transparent);
+}
+
+html.theme-ivory .hero-primary-cta {
+  box-shadow: 0 20px 50px -22px rgba(180, 35, 43, 0.55);
 }
 
 /* Warm white catalog surface: flips the ink tokens inside this section. */
@@ -224,7 +374,8 @@
 
 .surface-panel {
   background-color: var(--paper-deep);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: 0 24px 60px -40px rgba(8, 8, 8, 0.45);
 }
 
 .mono {
@@ -300,7 +451,7 @@
   align-items: center;
   gap: 0.4rem;
   background: var(--gold);
-  color: #0d0d0d;
+  color: var(--espresso);
   font-family: var(--font-latin);
   font-size: 0.6rem;
   letter-spacing: 0.12em;
@@ -385,17 +536,31 @@
 
 .gold-rim {
   box-shadow:
-    inset 0 0 0 1px rgba(197, 160, 89, 0.55),
-    inset 0 0 45px rgba(197, 160, 89, 0.12),
-    0 0 60px rgba(197, 160, 89, 0.18);
+    inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent),
+    inset 0 0 45px color-mix(in srgb, var(--gold) 12%, transparent),
+    0 0 60px color-mix(in srgb, var(--gold) 20%, transparent);
 }
 
 .gold-glow {
-  filter: drop-shadow(0 0 26px rgba(197, 160, 89, 0.28));
+  filter: drop-shadow(0 0 26px color-mix(in srgb, var(--gold) 32%, transparent));
+}
+
+html.theme-ivory .gold-rim {
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 35, 43, 0.5),
+    inset 0 0 45px rgba(180, 35, 43, 0.08),
+    0 0 70px rgba(180, 35, 43, 0.18);
 }
 
 .text-gold-gradient {
   background: linear-gradient(100deg, #f6e7c3 0%, #c5a059 45%, #8f6c2f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html.theme-ivory .text-gold-gradient {
+  background: linear-gradient(100deg, #7c141c 0%, #c32732 48%, #e77d83 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -411,7 +576,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(197, 160, 89, 0.65),
+    color-mix(in srgb, var(--gold) 65%, transparent),
     transparent
   );
   height: 1px;

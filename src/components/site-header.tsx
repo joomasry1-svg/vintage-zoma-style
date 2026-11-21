@@ -10,6 +10,7 @@ import {
   whatsappLink,
 } from "@/lib/store-helpers";
 import { ProductPlate } from "@/components/garment-plate";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -63,7 +64,7 @@ export function SiteHeader() {
                 ZOMA
               </span>
             )}
-            <span className="mono mt-1 flex max-w-[140px] items-center gap-1.5 truncate text-[7.5px] tracking-[0.16em] text-gold/75">
+            <span className="mono mt-1 hidden max-w-[140px] items-center gap-1.5 truncate text-[7.5px] tracking-[0.16em] text-gold/75 sm:flex">
               {settings.storeName}
               <span className="inline-block size-1 shrink-0 bg-gold" />
               {settings.city.split("·")[0]?.trim() || "CAIRO"}
@@ -106,9 +107,13 @@ export function SiteHeader() {
             </button>
           </nav>
 
-          <div className="ms-auto flex items-center gap-2 lg:ms-0">
+          <div className="ms-auto flex items-center gap-1.5 sm:gap-2 lg:ms-0">
             <div className="hidden w-44 md:block lg:w-52 xl:w-64">
               <HeaderSearch />
+            </div>
+
+            <div className="hidden min-[360px]:block">
+              <ThemeSwitcher labeled />
             </div>
 
             <a
@@ -192,6 +197,15 @@ export function SiteHeader() {
           </nav>
 
           <SheetFooter className="mt-auto gap-3 border-t border-ink/10 px-5 py-5">
+            <div className="flex items-center justify-between gap-3 border border-ink/10 px-3 py-2.5">
+              <div>
+                <p className="text-[11px] text-ink">ألوان الموقع</p>
+                <p className="mt-0.5 text-[8.5px] text-ink-soft/50">
+                  أبيض وأحمر أو ليل وذهبي
+                </p>
+              </div>
+              <ThemeSwitcher />
+            </div>
             <a
               href={whatsappLink(
                 "مرحباً Zoma، أحتاج مساعدة في اختيار قطعة أو حجز موعد.",
@@ -225,7 +239,7 @@ function AnnouncementMarquee() {
   return (
     <div
       dir="ltr"
-      className="marquee overflow-hidden border-b border-ink/10 bg-espresso py-2.5"
+      className="marquee announcement-bar overflow-hidden py-2.5"
     >
       <div
         className="marquee-track"
@@ -241,9 +255,9 @@ function AnnouncementMarquee() {
               <span
                 key={`${copy}-${index}`}
                 dir="rtl"
-                className="flex items-center gap-4 px-5 text-[10.5px] tracking-[0.02em] text-ink-soft/70"
+                className="flex items-center gap-4 px-5 text-[10.5px] tracking-[0.02em] text-[#f8f1e8]/75"
               >
-                <span className="inline-block size-1 bg-gold" />
+                <span className="inline-block size-1 bg-[#f6e7dc]" />
                 {text}
               </span>
             ))}

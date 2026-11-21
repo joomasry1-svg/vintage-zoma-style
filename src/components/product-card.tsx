@@ -62,7 +62,7 @@ export function ProductCard({
           </span>
         </div>
 
-        <span className="absolute inset-x-0 bottom-0 z-10 flex translate-y-full items-center justify-center gap-2 bg-espresso/95 px-4 py-2.5 text-[9px] tracking-[0.16em] text-gold transition-transform duration-300 ease-out group-hover:translate-y-0">
+        <span className="absolute inset-x-0 bottom-0 z-10 flex translate-y-full items-center justify-center gap-2 bg-gold px-4 py-2.5 text-[9px] font-medium tracking-[0.16em] text-espresso transition-transform duration-300 ease-out group-hover:translate-y-0">
           عرض سريع للمقاسات
           <ArrowUpRight className="size-3" />
         </span>

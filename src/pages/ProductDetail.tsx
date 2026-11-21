@@ -13,6 +13,7 @@ import {
 } from "@/lib/store-helpers";
 import { SiteLayout } from "@/components/site-layout";
 import { ProductVisual } from "@/components/product-visual";
+import { SizeGuide } from "@/components/size-guide";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -162,11 +163,11 @@ export default function ProductDetail() {
                   )}
                   eager
                 >
-                  <span className="mono absolute top-4 start-4 z-10 bg-espresso/80 px-2 py-1 text-[7px] tracking-[0.18em] text-stage backdrop-blur">
+                  <span className="mono absolute top-4 start-4 z-10 bg-black/55 px-2 py-1 text-[7px] tracking-[0.18em] text-white/80 backdrop-blur">
                     ZOMA EDIT / {product.kind.toUpperCase()}
                   </span>
                   {product.discount > 0 && (
-                    <span className="shimmer-sweep mono absolute top-4 end-4 z-10 border border-gold/40 bg-espresso/80 px-2 py-1 text-[9px] text-gold backdrop-blur">
+                    <span className="shimmer-sweep mono absolute top-4 end-4 z-10 border border-gold/40 bg-black/55 px-2 py-1 text-[9px] text-gold backdrop-blur">
                       -{product.discount}%
                     </span>
                   )}
@@ -174,7 +175,7 @@ export default function ProductDetail() {
                 <button
                   type="button"
                   onClick={() => setZoom((current) => !current)}
-                  className="absolute bottom-3 end-3 z-10 flex items-center gap-1.5 border border-white/25 bg-espresso/80 px-2.5 py-1.5 text-[9px] text-white backdrop-blur transition-colors hover:bg-gold hover:text-espresso"
+                  className="absolute bottom-3 end-3 z-10 flex items-center gap-1.5 border border-white/25 bg-black/55 px-2.5 py-1.5 text-[9px] text-white backdrop-blur transition-colors hover:bg-gold hover:text-espresso"
                 >
                   <Maximize2 className="size-3" />
                   {zoom ? "تصغير" : "تكبير"}
@@ -259,12 +260,9 @@ export default function ProductDetail() {
             <div className="mt-6">
               <div className="flex items-baseline justify-between">
                 <p className="text-[11px] font-medium text-ink">المقاس</p>
-                <Link
-                  to="/booking"
-                  className="text-[9.5px] text-ink-soft/45 underline underline-offset-4 transition-colors hover:text-gold"
-                >
-                  محتاج مساعدة في المقاس؟
-                </Link>
+                <span className="text-[9px] text-ink-soft/45">
+                  القياسات تظهر فور اختيار المقاس
+                </span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {product.sizes.map((option) => (
@@ -284,6 +282,7 @@ export default function ProductDetail() {
                   </button>
                 ))}
               </div>
+              {size && <SizeGuide product={product} size={size} />}
             </div>
 
             <div className="mt-5">

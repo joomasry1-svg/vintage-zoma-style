@@ -9,6 +9,7 @@ import {
   whatsappLink,
 } from "@/lib/store-helpers";
 import { ProductVisual } from "@/components/product-visual";
+import { SizeGuide } from "@/components/size-guide";
 import {
   Dialog,
   DialogContent,
@@ -96,7 +97,7 @@ export function ProductQuickView({
               <button
                 type="button"
                 onClick={() => setZoom((current) => !current)}
-                className="absolute bottom-3 end-3 flex items-center gap-1.5 border border-[#211c17]/20 bg-stage/90 px-2.5 py-1.5 text-[9px] text-[#211c17] transition-colors hover:bg-[#211c17] hover:text-stage"
+                className="absolute bottom-3 end-3 flex items-center gap-1.5 border border-ink/20 bg-paper/85 px-2.5 py-1.5 text-[9px] text-ink backdrop-blur transition-colors hover:bg-ink hover:text-paper"
               >
                 <Maximize2 className="size-3" />
                 {zoom ? "تصغير" : "تكبير"}
@@ -148,7 +149,7 @@ export function ProductQuickView({
               <div className="flex items-baseline justify-between">
                 <p className="text-[11px] font-medium text-ink">المقاس</p>
                 <span className="text-[9px] text-ink-soft/40">
-                  دليل المقاسات على واتساب
+                  اضغط مقاساً لعرض القياسات
                 </span>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -168,6 +169,7 @@ export function ProductQuickView({
                   </button>
                 ))}
               </div>
+              {size && <SizeGuide compact product={product} size={size} />}
             </div>
 
             <div className="mt-5">

@@ -8,6 +8,7 @@ import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import { StoreProvider } from "@/context/store-context";
+import { ThemeProvider, useTheme } from "@/context/theme-context";
 import { CartSheet } from "@/components/cart-sheet";
 import "./index.css";
 
@@ -93,6 +94,16 @@ class RootErrorBoundary extends React.Component<
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
+function ThemedToaster() {
+  const { theme } = useTheme();
+  return (
+    <Toaster
+      theme={theme === "ivory" ? "light" : "dark"}
+      position="top-center"
+    />
+  );
+}
+
 function RouteSyncer() {
   const location = useLocation();
   useEffect(() => {
@@ -122,37 +133,39 @@ createRoot(document.getElementById("root")!).render(
       <ToolbarErrorBoundary>
         <VlyToolbar />
       </ToolbarErrorBoundary>
-      <ConvexAuthProvider client={convex}>
-        <StoreProvider>
-          <BrowserRouter>
-            <RouteSyncer />
-            <Suspense fallback={<RouteLoading />}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/product/:slug" element={<ProductDetail />} />
-                <Route path="/lookbook" element={<Lookbook />} />
-                <Route path="/booking" element={<Booking />} />
-                <Route
-                  path="/auth"
-                  element={<AuthPage redirectAfterAuth="/dashboard" />}
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <RequireAuth>
-                      <Dashboard />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-            <CartSheet />
-          </BrowserRouter>
-        </StoreProvider>
-      </ConvexAuthProvider>
-      <Toaster theme="dark" position="top-center" />
+      <ThemeProvider>
+        <ConvexAuthProvider client={convex}>
+          <StoreProvider>
+            <BrowserRouter>
+              <RouteSyncer />
+              <Suspense fallback={<RouteLoading />}>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/product/:slug" element={<ProductDetail />} />
+                  <Route path="/lookbook" element={<Lookbook />} />
+                  <Route path="/booking" element={<Booking />} />
+                  <Route
+                    path="/auth"
+                    element={<AuthPage redirectAfterAuth="/dashboard" />}
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <RequireAuth>
+                        <Dashboard />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+              <CartSheet />
+            </BrowserRouter>
+          </StoreProvider>
+        </ConvexAuthProvider>
+        <ThemedToaster />
+      </ThemeProvider>
     </RootErrorBoundary>
   </StrictMode>,
 );

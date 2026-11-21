@@ -162,20 +162,20 @@ export default function Landing() {
     <SiteLayout>
       <Hero onShop={goToCategory} onQuickView={setActiveProduct} />
 
-      <section className="border-y border-gold/15 bg-[#101010]">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/10 px-4 sm:px-6 md:grid-cols-4 lg:px-8">
+      <section className="border-y border-gold/15 bg-paper-deep/70">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-ink/10 px-4 sm:px-6 md:grid-cols-4 lg:px-8">
           {PILLARS.map((pillar) => (
             <div key={pillar.index} className="flex flex-col gap-2 py-6 ps-4 sm:ps-6">
               <div className="flex items-center justify-between">
                 <pillar.icon className="size-4 text-gold" strokeWidth={1.4} />
-                <span className="mono text-[8px] text-white/20">
+                <span className="mono text-[8px] text-ink-soft/35">
                   {pillar.index}
                 </span>
               </div>
-              <p className="mt-1 text-[11.5px] font-medium text-white">
+              <p className="mt-1 text-[11.5px] font-medium text-ink">
                 {pillar.title}
               </p>
-              <p className="text-[10px] leading-5 text-white/45">
+              <p className="text-[10px] leading-5 text-ink-soft/65">
                 {pillar.note}
               </p>
             </div>
@@ -183,7 +183,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-[#0d0d0d] px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className="relative overflow-hidden bg-paper px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -start-24 top-0 size-[420px] rounded-full bg-gold/[0.07] blur-3xl"
@@ -192,12 +192,12 @@ export default function Landing() {
           <Reveal className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
               <SectionLabel index="01" english="THE WINTER EDIT" arabic="مختارات الشتاء" />
-              <h2 className="mt-4 max-w-2xl text-3xl leading-snug text-white sm:text-4xl lg:text-[2.9rem]">
+              <h2 className="mt-4 max-w-2xl text-3xl leading-snug text-ink sm:text-4xl lg:text-[2.9rem]">
                 طبقات تُلبس
                 <span className="text-gold-gradient"> مرة واحدة،</span>
                 <span className="block">وتُذكر طويلاً.</span>
               </h2>
-              <p className="mt-4 max-w-xl text-[12px] leading-7 text-white/50">
+              <p className="mt-4 max-w-xl text-[12px] leading-7 text-ink-soft/75">
                 أربع قطع أساسية لهذا الشتاء: معطف صوف أسود، كاميل كشمير، جاكيت
                 جلد طبيعي، وبافر خفيف للسفر. كل قطعة بعدد محدود.
               </p>
@@ -205,7 +205,7 @@ export default function Landing() {
             <button
               type="button"
               onClick={() => goToCategory("outerwear")}
-              className="group flex h-11 shrink-0 items-center gap-2 border border-gold/40 px-5 text-[10.5px] text-gold transition-colors hover:bg-gold hover:text-black"
+              className="group flex h-11 shrink-0 items-center gap-2 border border-gold/40 px-5 text-[10.5px] text-gold transition-colors hover:bg-gold hover:text-espresso"
             >
               كل تشكيلة الشتاء
               <ArrowUpLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -223,7 +223,7 @@ export default function Landing() {
             ))}
           </div>
 
-          <div className="mono mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-[8px] tracking-[0.16em] text-white/30">
+          <div className="mono mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 pt-4 text-[8px] tracking-[0.16em] text-ink-soft/50">
             <span className="flex items-center gap-2">
               <Crown className="size-3 text-gold" />
               VIP EARLY ACCESS · WINTER 26
@@ -235,16 +235,16 @@ export default function Landing() {
 
       <HomeMarquee />
 
-      <section className="relative border-y border-white/10 bg-[#111111] px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className="relative border-y border-ink/10 bg-paper-deep/60 px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <Reveal className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
               <SectionLabel index="02" english="CHOOSE YOUR LAYER" arabic="اختر قسمك" />
-              <h2 className="mt-4 text-3xl text-white sm:text-4xl">
+              <h2 className="mt-4 text-3xl text-ink sm:text-4xl">
                 ابدأ من الطبقة الصحيحة.
               </h2>
             </div>
-            <p className="max-w-sm text-[11px] leading-6 text-white/40">
+            <p className="max-w-sm text-[11px] leading-6 text-ink-soft/65">
               أقسام المتجر تُدار من لوحة المالك، وأي قسم جديد يظهر هنا فوراً.
             </p>
           </Reveal>
@@ -278,7 +278,7 @@ export default function Landing() {
                       className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-110"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,#2a2a2a,#111)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,var(--stage),var(--paper-deep))]" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/10" />
                   <div className="absolute inset-3 border border-white/10 transition-colors duration-500 group-hover:border-gold/30" />
@@ -455,17 +455,15 @@ export default function Landing() {
         </div>
       </section>
 
-      <BookingBreak />
-
-      <section className="relative overflow-hidden border-t border-white/10 bg-[#0d0d0d] px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className="relative overflow-hidden border-t border-ink/10 bg-paper px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mx-auto max-w-7xl">
           <Reveal className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
-              <SectionLabel index="05" english="THE COMMUNITY" arabic="مجتمع Zoma" />
-              <h2 className="mt-4 text-3xl text-white sm:text-4xl">
+              <SectionLabel index="04" english="THE COMMUNITY" arabic="مجتمع Zoma" />
+              <h2 className="mt-4 text-3xl text-ink sm:text-4xl">
                 إطلالات من عملائنا.
               </h2>
-              <p className="mt-2 max-w-lg text-[12px] leading-7 text-white/45">
+              <p className="mt-2 max-w-lg text-[12px] leading-7 text-ink-soft/70">
                 مساحة يشارك فيها عملاء Zoma إطلالاتهم. ارفع صورتك بالقطعة التي
                 اخترتها، وسننشرها هنا بعد مراجعة سريعة.
               </p>
@@ -473,14 +471,14 @@ export default function Landing() {
             <div className="flex gap-2">
               <Link
                 to="/lookbook"
-                className="flex h-10 items-center gap-2 border border-white/20 px-4 text-[10px] text-white/70 transition-colors hover:border-gold hover:text-gold"
+                className="flex h-10 items-center gap-2 border border-ink/20 px-4 text-[10px] text-ink-soft/80 transition-colors hover:border-gold hover:text-gold"
               >
                 استعرض المجتمع
                 <ArrowUpLeft className="size-3.5" />
               </Link>
               <Link
                 to="/lookbook#share"
-                className="shimmer-sweep flex h-10 items-center gap-2 bg-gold px-4 text-[10px] font-semibold text-black transition-opacity hover:opacity-90"
+                className="shimmer-sweep flex h-10 items-center gap-2 bg-gold px-4 text-[10px] font-semibold text-espresso transition-opacity hover:opacity-90"
               >
                 شارك إطلالتك
               </Link>
@@ -493,10 +491,10 @@ export default function Landing() {
                 <Link
                   key={post._id}
                   to="/lookbook"
-                  className="group border border-white/10 bg-[#161616] p-2 transition-colors hover:border-gold/40"
+                  className="group border border-ink/10 bg-card p-2 transition-colors hover:border-gold/40"
                 >
                   {post.imageUrl ? (
-                    <div className="aspect-[4/3] overflow-hidden bg-[#1d1d1d]">
+                    <div className="aspect-[4/3] overflow-hidden bg-paper-deep">
                       <img
                         src={post.imageUrl}
                         alt={post.caption}
@@ -505,17 +503,17 @@ export default function Landing() {
                       />
                     </div>
                   ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center bg-[#1a1a1a] px-5 text-center">
-                      <p className="text-[13px] leading-6 text-white/60">
+                    <div className="flex aspect-[4/3] items-center justify-center bg-paper-deep px-5 text-center">
+                      <p className="text-[13px] leading-6 text-ink-soft/75">
                         {post.caption}
                       </p>
                     </div>
                   )}
                   <div className="flex items-center justify-between gap-2 px-1 pt-2">
-                    <span className="text-[10px] text-white/50">
+                    <span className="text-[10px] text-ink-soft/70">
                       {post.authorName}
                     </span>
-                    <span className="mono text-[8px] text-white/25">
+                    <span className="mono text-[8px] text-ink-soft/40">
                       {formatDate(post.createdAt)}
                     </span>
                   </div>
@@ -523,21 +521,21 @@ export default function Landing() {
               ))}
             </div>
           ) : (
-            <div className="mt-7 grid gap-3 border border-white/10 bg-[#151515] p-6 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="mt-7 grid gap-3 border border-ink/10 bg-card p-6 sm:grid-cols-[1fr_auto] sm:items-center">
               <div>
                 <p className="mono text-[9px] tracking-[0.16em] text-gold">
                   OPEN CALL
                 </p>
-                <p className="mt-2 text-xl text-white">
+                <p className="mt-2 text-xl text-ink">
                   كن أول من يشارك إطلالته هنا.
                 </p>
-                <p className="mt-1 text-[11px] text-white/40">
+                <p className="mt-1 text-[11px] text-ink-soft/65">
                   ارفع صورة واضحة، واكتب اسم القطعة أو المناسبة في الوصف.
                 </p>
               </div>
               <Link
                 to="/lookbook#share"
-                className="flex h-10 items-center justify-center border border-gold/50 px-4 text-[10px] text-gold transition-colors hover:bg-gold hover:text-black"
+                className="flex h-10 items-center justify-center border border-gold/50 px-4 text-[10px] text-gold transition-colors hover:bg-gold hover:text-espresso"
               >
                 ابدأ المشاركة
               </Link>
@@ -548,16 +546,16 @@ export default function Landing() {
 
       <StorySection />
 
-      <section className="border-t border-white/10 bg-[#101010] px-4 py-16 sm:px-6 lg:px-8">
+      <section className="border-t border-ink/10 bg-paper-deep/60 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <Reveal className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
             <div>
-              <SectionLabel index="07" english="HOW IT WORKS" arabic="كيف يعمل" />
-              <h2 className="mt-4 text-3xl text-white sm:text-4xl">
+              <SectionLabel index="06" english="HOW IT WORKS" arabic="كيف يعمل" />
+              <h2 className="mt-4 text-3xl text-ink sm:text-4xl">
                 من الاختيار إلى الباب.
               </h2>
             </div>
-            <span className="mono text-[8px] tracking-[0.16em] text-white/25">
+            <span className="mono text-[8px] tracking-[0.16em] text-ink-soft/40">
               04 STEPS / NO FRICTION
             </span>
           </Reveal>
@@ -591,18 +589,18 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.45 }}
-                className="group border border-white/10 bg-[#151515] p-6 transition-colors hover:border-gold/35"
+                className="group border border-ink/10 bg-card p-6 transition-colors hover:border-gold/35"
               >
                 <div className="flex items-center justify-between">
                   <span className="mono text-[10px] text-gold">
                     {step.number}
                   </span>
-                  <span className="h-px w-8 bg-white/10 transition-colors group-hover:bg-gold/50" />
+                  <span className="h-px w-8 bg-ink/10 transition-colors group-hover:bg-gold/50" />
                 </div>
-                <h3 className="mt-4 text-lg font-medium text-white">
+                <h3 className="mt-4 text-lg font-medium text-ink">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-[11.5px] leading-7 text-white/45">
+                <p className="mt-2 text-[11.5px] leading-7 text-ink-soft/70">
                   {step.copy}
                 </p>
               </motion.div>
@@ -611,17 +609,17 @@ export default function Landing() {
 
           <div className="mt-8 flex flex-col items-start justify-between gap-4 border border-gold/25 bg-gold/[0.04] px-5 py-5 sm:flex-row sm:items-center">
             <div className="flex items-center gap-3">
-              <span className="mono text-[9px] text-white/30">BAG</span>
-              <p className="text-[12px] text-white/75">
+              <span className="mono text-[9px] text-ink-soft/45">BAG</span>
+              <p className="text-[12px] text-ink/80">
                 {cart.count > 0
                   ? `لديك ${cart.count} قطعة في الحقيبة — متوسط الإتمام دقيقة واحدة.`
-                  : "حقيبتك فارغة. ابدأ بمعطف شتوي، أو احجز جلسة قياس أولاً."}
+                  : "حقيبتك فارغة. ابدأ بمعطف شتوي، أو تصفّح الأقسام."}
               </p>
             </div>
             <button
               type="button"
               onClick={cart.openCart}
-              className="shimmer-sweep flex h-10 items-center gap-2 bg-gold px-4 text-[10px] font-semibold text-black transition-opacity hover:opacity-90"
+              className="shimmer-sweep flex h-10 items-center gap-2 bg-gold px-4 text-[10px] font-semibold text-espresso transition-opacity hover:opacity-90"
             >
               راجع الحقيبة ({cart.count})
               <ArrowUpLeft className="size-3.5" />
@@ -677,11 +675,11 @@ function SectionLabel({
       <span className="mono border border-gold/30 px-2 py-1 text-[8px] tracking-[0.18em] text-gold">
         {index}
       </span>
-      <span className="mono text-[8px] tracking-[0.2em] text-white/30">
+      <span className="mono text-[8px] tracking-[0.2em] text-ink-soft/55">
         {english}
       </span>
       <span className="h-px w-8 bg-gold/30" />
-      <span className="text-[10px] text-white/45">{arabic}</span>
+      <span className="text-[10px] text-ink-soft/70">{arabic}</span>
     </div>
   );
 }
@@ -704,7 +702,7 @@ function CategoryChip({
       className={cn(
         "flex shrink-0 items-center gap-2 border px-3.5 py-2 text-[10.5px] transition-colors",
         active
-          ? "border-gold bg-[#15130f] text-gold"
+          ? "border-gold bg-gold text-espresso"
           : "border-ink/20 text-ink-soft/75 hover:border-ink/45 hover:text-ink",
       )}
     >
@@ -712,7 +710,7 @@ function CategoryChip({
       <span
         className={cn(
           "mono text-[8px]",
-          active ? "text-gold/60" : "text-ink-soft/40",
+          active ? "text-espresso/65" : "text-ink-soft/40",
         )}
       >
         {String(count).padStart(2, "0")}
@@ -730,7 +728,7 @@ function HomeMarquee() {
     "VIP GOLD MEMBERS",
   ];
   return (
-    <div className="marquee overflow-hidden border-y border-black/20 bg-gold py-2.5" dir="ltr">
+    <div className="marquee overflow-hidden border-y border-ink/15 bg-gold py-2.5" dir="ltr">
       <div
         className="marquee-track"
         style={{ "--marquee-duration": "38s" } as React.CSSProperties}
@@ -744,7 +742,7 @@ function HomeMarquee() {
             {items.map((item) => (
               <span
                 key={`${copy}-${item}`}
-                className="mono flex items-center gap-4 px-6 text-[9px] font-semibold tracking-[0.22em] text-black/80"
+                className="mono flex items-center gap-4 px-6 text-[9px] font-semibold tracking-[0.22em] text-espresso"
               >
                 <Crown className="size-3 opacity-60" />
                 {item}
@@ -775,7 +773,7 @@ function CampaignBanner() {
   return (
     <section
       ref={ref}
-      className="relative isolate overflow-hidden border-y border-gold/20 bg-[#0a0a0a]"
+      className="relative isolate overflow-hidden border-y border-gold/20 bg-paper"
     >
       <div className="absolute inset-0 overflow-hidden">
         <motion.img
@@ -783,11 +781,11 @@ function CampaignBanner() {
           alt=""
           aria-hidden="true"
           style={reduceMotion ? undefined : { y: imageY }}
-          className="h-[116%] w-full object-cover object-[50%_35%] opacity-45"
+          className="campaign-image h-[116%] w-full object-cover object-[50%_35%]"
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-l from-black/35 via-black/70 to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(70%_120%_at_80%_50%,rgba(197,160,89,0.18),transparent_60%)]" />
+      <div className="campaign-overlay absolute inset-0" />
+      <div className="campaign-glow absolute inset-0" />
 
       <div className="relative mx-auto flex max-w-7xl flex-col justify-between gap-6 px-4 py-20 sm:px-6 lg:min-h-[420px] lg:flex-row lg:items-end lg:px-8 lg:py-16">
         <motion.div
@@ -798,17 +796,17 @@ function CampaignBanner() {
           className="max-w-xl"
         >
           <div className="flex items-center gap-3">
-            <span className="shimmer-sweep mono bg-gold px-2.5 py-1.5 text-[8px] font-bold tracking-[0.16em] text-black">
+            <span className="shimmer-sweep mono bg-gold px-2.5 py-1.5 text-[8px] font-bold tracking-[0.16em] text-espresso">
               {banner.eyebrow}
             </span>
-            <span className="mono text-[8px] tracking-[0.18em] text-white/35">
+            <span className="mono text-[8px] tracking-[0.18em] text-ink-soft/55">
               LIMITED INVITATION
             </span>
           </div>
-          <h2 className="mt-5 text-[2.2rem] leading-[1.25] text-white sm:text-[3rem]">
+          <h2 className="mt-5 text-[2.2rem] leading-[1.25] text-ink sm:text-[3rem]">
             {banner.title}
           </h2>
-          <p className="mt-3 max-w-lg text-[12px] leading-7 text-white/55">
+          <p className="mt-3 max-w-lg text-[12px] leading-7 text-ink-soft/80">
             {banner.subtitle}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -817,7 +815,7 @@ function CampaignBanner() {
                 href={banner.ctaHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shimmer-sweep flex h-11 items-center gap-2 bg-gold px-5 text-[10.5px] font-semibold text-black transition-colors hover:bg-gold-soft"
+                className="shimmer-sweep flex h-11 items-center gap-2 bg-gold px-5 text-[10.5px] font-semibold text-espresso transition-colors hover:bg-gold-soft"
               >
                 {banner.ctaLabel}
                 <ArrowUpLeft className="size-3.5" />
@@ -825,13 +823,13 @@ function CampaignBanner() {
             ) : (
               <Link
                 to={banner.ctaHref}
-                className="shimmer-sweep flex h-11 items-center gap-2 bg-gold px-5 text-[10.5px] font-semibold text-black transition-colors hover:bg-gold-soft"
+                className="shimmer-sweep flex h-11 items-center gap-2 bg-gold px-5 text-[10.5px] font-semibold text-espresso transition-colors hover:bg-gold-soft"
               >
                 {banner.ctaLabel}
                 <ArrowUpLeft className="size-3.5" />
               </Link>
             )}
-            <span className="mono flex items-center gap-2 text-[8px] tracking-[0.12em] text-white/35">
+            <span className="mono flex items-center gap-2 text-[8px] tracking-[0.12em] text-ink-soft/60">
               <Crown className="size-3 text-gold" /> VIP MEMBERS FIRST
             </span>
           </div>
@@ -842,17 +840,17 @@ function CampaignBanner() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.8, delay: 0.1 }}
-          className="hidden w-52 shrink-0 border border-gold/40 bg-black/35 p-4 backdrop-blur-md lg:block"
+          className="hidden w-52 shrink-0 border border-gold/35 bg-card/80 p-4 backdrop-blur-md lg:block"
         >
           <p className="mono text-[7.5px] tracking-[0.2em] text-gold">
             THE GOLD CARD
           </p>
-          <p className="mt-2 text-2xl leading-8 text-white">
+          <p className="mt-2 text-2xl leading-8 text-ink">
             خصومات
             <span className="block text-gold">لا تُنشر.</span>
           </p>
-          <div className="mt-4 border-t border-white/15 pt-3">
-            <p className="text-[9.5px] leading-5 text-white/45">
+          <div className="mt-4 border-t border-ink/15 pt-3">
+            <p className="text-[9.5px] leading-5 text-ink-soft/70">
               للعملاء المسجلين فقط. سجّل دخولك قبل نهاية الموسم.
             </p>
             <Link
@@ -869,47 +867,6 @@ function CampaignBanner() {
   );
 }
 
-function BookingBreak() {
-  return (
-    <section className="relative overflow-hidden border-y border-black/20 bg-gold px-4 py-14 text-[#0d0d0d] sm:px-6 lg:px-8">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -end-20 -top-28 size-72 rounded-full border border-black/10"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -end-8 top-1/2 size-40 -translate-y-1/2 rounded-full border border-black/10"
-      />
-      <div className="relative mx-auto flex max-w-7xl flex-col justify-between gap-8 md:flex-row md:items-center">
-        <div>
-          <p className="mono text-[9px] tracking-[0.2em] text-black/55">
-            FITTING ROOM / 04
-          </p>
-          <h2 className="mt-3 max-w-xl text-3xl leading-snug sm:text-4xl">
-            مقاسك الصح، من أول مرة.
-          </h2>
-          <p className="mt-3 max-w-xl text-[12.5px] leading-7 text-black/65">
-            احجز ٣٠ دقيقة في استوديو Zoma. نأخذ مقاساتك، نجرّب القطع، ونرسل لك
-            ملخصاً بمقاساتك لطلبك القادم.
-          </p>
-          <ul className="mono mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[9px] font-medium tracking-[0.06em]">
-            <li>— قياس كامل</li>
-            <li>— استشارة تنسيق</li>
-            <li>— بدون أي رسوم</li>
-          </ul>
-        </div>
-        <Link
-          to="/booking"
-          className="shimmer-sweep group flex h-12 shrink-0 items-center justify-center gap-3 bg-[#0d0d0d] px-7 text-[11px] font-semibold tracking-[0.1em] text-gold transition-colors hover:bg-[#1a1a1a]"
-        >
-          احجز موعدك
-          <ArrowUpLeft className="size-4 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
-        </Link>
-      </div>
-    </section>
-  );
-}
-
 function StorySection() {
   const reduceMotion = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
@@ -921,7 +878,7 @@ function StorySection() {
   const { products } = useStore();
 
   return (
-    <section ref={ref} className="canvas-dark overflow-hidden border-t border-white/10">
+    <section ref={ref} className="canvas-dark overflow-hidden border-t border-ink/10">
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24">
         <motion.div
           initial={{ opacity: 0, scale: 0.97 }}
@@ -945,29 +902,29 @@ function StorySection() {
               </span>
             </div>
           </div>
-          <div className="absolute -bottom-5 -end-2 border border-gold/30 bg-[#111] px-4 py-2.5 sm:-end-4">
+          <div className="absolute -bottom-5 -end-2 border border-gold/30 bg-card px-4 py-2.5 shadow-xl sm:-end-4">
             <p className="mono text-[8px] tracking-[0.16em] text-gold">
               IN THE STUDIO
             </p>
-            <p className="mt-1 text-[11px] text-white">
+            <p className="mt-1 text-[11px] text-ink">
               صوف كشمير — موسم ٢٦
             </p>
           </div>
         </motion.div>
 
         <div className="order-1 lg:order-2">
-          <SectionLabel index="06" english="THE STORE" arabic="عن Zoma" />
-          <h2 className="mt-4 text-3xl leading-[1.4] text-white sm:text-[2.5rem]">
+          <SectionLabel index="05" english="THE STORE" arabic="عن Zoma" />
+          <h2 className="mt-4 text-3xl leading-[1.4] text-ink sm:text-[2.5rem]">
             لا نتبع الموضة.
             <span className="block text-gold-gradient">نختار ما يبقى.</span>
           </h2>
-          <p className="mt-5 max-w-md text-[12.5px] leading-8 text-white/55">
+          <p className="mt-5 max-w-md text-[12.5px] leading-8 text-ink-soft/80">
             نعمل مع عدد محدود من الموردين، ونعيد ضبط القصّات لتناسب أجساماً
             حقيقية. كل قطعة تمر على خياط واحد قبل أن تصل إليك، ونحتفظ بملف
             مقاساتك لتصبح الطلبات القادمة أسهل.
           </p>
 
-          <div className="mt-8 grid max-w-sm grid-cols-3 gap-4 border-t border-white/10 pt-6">
+          <div className="mt-8 grid max-w-sm grid-cols-3 gap-4 border-t border-ink/10 pt-6">
             {[
               { value: String(products.length), label: "قطعة في التحرير" },
               { value: "24H", label: "تجهيز الطلب" },
@@ -975,7 +932,7 @@ function StorySection() {
             ].map((stat) => (
               <div key={stat.label}>
                 <p className="mono text-xl text-gold">{stat.value}</p>
-                <p className="mt-1 text-[9.5px] leading-4 text-white/40">
+                <p className="mt-1 text-[9.5px] leading-4 text-ink-soft/65">
                   {stat.label}
                 </p>
               </div>
@@ -985,7 +942,7 @@ function StorySection() {
           <div className="mt-8 flex flex-wrap gap-2">
             <Link
               to="/booking"
-              className="flex h-11 items-center gap-2 border border-gold/40 px-5 text-[10.5px] text-gold transition-colors hover:bg-gold hover:text-black"
+              className="flex h-11 items-center gap-2 border border-gold/40 px-5 text-[10.5px] text-gold transition-colors hover:bg-gold hover:text-espresso"
             >
               احجز جلسة قياس
               <ArrowUpLeft className="size-3.5" />
@@ -997,7 +954,7 @@ function StorySection() {
                   .getElementById("catalog")
                   ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
-              className="flex h-11 items-center gap-2 border border-white/15 px-5 text-[10.5px] text-white/75 transition-colors hover:border-white/40 hover:text-white"
+              className="flex h-11 items-center gap-2 border border-ink/15 px-5 text-[10.5px] text-ink/80 transition-colors hover:border-ink/40 hover:text-ink"
             >
               تصفّح الكتالوج
             </button>

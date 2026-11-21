@@ -71,7 +71,7 @@ export function Hero({
 
   return (
     <section
-      className="relative isolate overflow-hidden bg-[#0b0b0b]"
+      className="relative isolate overflow-hidden bg-paper"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocusCapture={() => setPaused(true)}
@@ -92,18 +92,18 @@ export function Hero({
             alt=""
             className="h-full w-full scale-110 object-cover object-[60%_20%] opacity-[0.18] blur-3xl"
           />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#0b0b0b]/55 to-[#0b0b0b]" />
+          <div className="hero-image-fade absolute inset-0" />
         </motion.div>
       </AnimatePresence>
 
-      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(80%_60%_at_82%_35%,rgba(197,160,89,0.16),transparent_65%)]" />
+      <div className="hero-atmosphere pointer-events-none absolute inset-0 z-0" />
       <div
         aria-hidden="true"
         className="noise-soft pointer-events-none absolute inset-0 z-0 opacity-40 mix-blend-soft-light"
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -end-8 top-24 z-0 select-none font-latin text-[22vw] leading-none tracking-[0.06em] text-white/[0.025]"
+        className="pointer-events-none absolute -end-8 top-24 z-0 select-none font-latin text-[22vw] leading-none tracking-[0.06em] text-ink/[0.03]"
       >
         ZOMA
       </div>
@@ -119,15 +119,15 @@ export function Hero({
             <span className="mono border border-gold/35 bg-gold/10 px-2.5 py-1.5 text-[8.5px] tracking-[0.22em] text-gold">
               WINTER EDITION / 2026
             </span>
-            <span className="flex items-center gap-1.5 text-[10px] text-white/45">
+            <span className="flex items-center gap-1.5 text-[10px] text-ink-soft/70">
               <Star className="size-3 fill-gold text-gold" />
               <span className="mono tracking-[0.08em]">4.9 / 5</span>
-              <span className="text-white/25">·</span>
+              <span className="text-ink-soft/30">·</span>
               CAIRO — MILANO
             </span>
           </div>
 
-          <h1 className="mt-7 text-[3.1rem] font-semibold leading-[1.12] text-white sm:text-[4rem] lg:text-[4.7rem]">
+          <h1 className="mt-7 text-[3.1rem] font-semibold leading-[1.12] text-ink sm:text-[4rem] lg:text-[4.7rem]">
             الشتاء
             <span className="mt-1 block">
               بلون
@@ -135,7 +135,7 @@ export function Hero({
             </span>
           </h1>
 
-          <p className="mt-6 max-w-md text-[13.5px] leading-8 text-white/65">
+          <p className="mt-6 max-w-md text-[13.5px] leading-8 text-ink-soft/80">
             معاطف صوف وجلد طبيعي وبدلات مقصوصة بكتف مضبوط. قطع محدودة من
             استوديو Zoma، تصل إلى بابك في كل محافظات مصر.
           </p>
@@ -144,14 +144,14 @@ export function Hero({
             <button
               type="button"
               onClick={() => onShop("outerwear")}
-              className="shimmer-sweep group flex h-12 items-center justify-center gap-3 bg-gold px-7 text-[11px] font-bold tracking-[0.08em] text-[#0d0d0d] shadow-[0_18px_45px_-22px_rgba(197,160,89,0.8)] transition-all hover:bg-gold-soft"
+              className="hero-primary-cta shimmer-sweep group flex h-12 items-center justify-center gap-3 bg-gold px-7 text-[11px] font-bold tracking-[0.08em] text-espresso transition-all hover:bg-gold-soft"
             >
               تسوّق تشكيلة الشتاء
               <ArrowUpLeft className="size-4 transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
             <Link
               to="/booking"
-              className="group flex h-12 items-center justify-center gap-2.5 border border-white/20 px-6 text-[11px] text-white/85 backdrop-blur transition-colors hover:border-gold/60 hover:text-gold"
+              className="group flex h-12 items-center justify-center gap-2.5 border border-ink/20 px-6 text-[11px] text-ink/85 backdrop-blur transition-colors hover:border-gold/60 hover:text-gold"
             >
               احجز جلسة قياس
               <span className="mono text-[8px] tracking-[0.12em] text-gold">
@@ -160,11 +160,11 @@ export function Hero({
             </Link>
           </div>
 
-          <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-white/10 pt-5">
-            <span className="mono text-[9px] tracking-[0.16em] text-white/40">
+          <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 border-t border-ink/10 pt-5">
+            <span className="mono text-[9px] tracking-[0.16em] text-ink-soft/55">
               {products.length} PIECES
             </span>
-            <span className="mono text-[9px] tracking-[0.16em] text-white/40">
+            <span className="mono text-[9px] tracking-[0.16em] text-ink-soft/55">
               HAND-FINISHED
             </span>
             <a
@@ -174,7 +174,7 @@ export function Hero({
               )}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[10px] text-white/55 transition-colors hover:text-gold"
+              className="flex items-center gap-1.5 text-[10px] text-ink-soft/70 transition-colors hover:text-gold"
             >
               <MessageCircle className="size-3.5" />
               استشارة خاصة على واتساب
@@ -187,8 +187,8 @@ export function Hero({
                 <span
                   key={slide.key}
                   className={cn(
-                    "size-7 overflow-hidden rounded-full border-2 bg-[#1a1a1a]",
-                    slideIndex === index ? "border-gold" : "border-white/25",
+                    "size-7 overflow-hidden rounded-full border-2 bg-paper-deep",
+                    slideIndex === index ? "border-gold" : "border-ink/20",
                   )}
                 >
                   <img
@@ -199,8 +199,8 @@ export function Hero({
                 </span>
               ))}
             </div>
-            <p className="text-[10px] leading-5 text-white/40">
-              <span className="text-white/75">{slides.length} إطلالات</span>{" "}
+            <p className="text-[10px] leading-5 text-ink-soft/60">
+              <span className="text-ink/80">{slides.length} إطلالات</span>{" "}
               مختارة لهذا الموسم
             </p>
           </div>
@@ -221,7 +221,7 @@ export function Hero({
               <span className="inline-block size-1 animate-pulse bg-gold" />
               THE WINTER CAROUSEL
             </p>
-            <span className="mono text-[8px] tracking-[0.18em] text-white/30">
+            <span className="mono text-[8px] tracking-[0.18em] text-ink-soft/50">
               AUTO / {paused ? "PAUSED" : "03D"}
             </span>
           </div>
@@ -283,10 +283,10 @@ export function Hero({
                   >
                     <div
                       className={cn(
-                        "group relative h-full w-full overflow-hidden border bg-[#101010] transition-colors duration-700",
+                        "group relative h-full w-full overflow-hidden border bg-stage transition-colors duration-700",
                         isActive
                           ? "gold-rim border-gold/60"
-                          : "border-white/10",
+                          : "border-ink/10",
                       )}
                     >
                       <motion.div
@@ -331,7 +331,7 @@ export function Hero({
                           {slide.kicker}
                         </span>
                         {slide.product && slide.product.discount > 0 && (
-                          <span className="shimmer-sweep mono bg-gold px-2 py-1 text-[8px] font-bold tracking-[0.08em] text-black">
+                          <span className="shimmer-sweep mono bg-gold px-2 py-1 text-[8px] font-bold tracking-[0.08em] text-espresso">
                             VIP −{slide.product.discount}%
                           </span>
                         )}
@@ -373,7 +373,7 @@ export function Hero({
                               <Link
                                 to={`/product/${slide.product.id}`}
                                 aria-label={`تفاصيل ${slide.product.name}`}
-                                className="flex size-8 items-center justify-center bg-gold text-black transition-colors hover:bg-gold-soft"
+                                className="flex size-8 items-center justify-center bg-gold text-espresso transition-colors hover:bg-gold-soft"
                               >
                                 <ArrowUpLeft className="size-3.5" />
                               </Link>
@@ -438,10 +438,10 @@ export function Hero({
                 aria-label={`عرض ${slide.title}`}
                 aria-current={slideIndex === index}
                 className={cn(
-                  "group relative h-14 w-11 overflow-hidden border bg-[#151515] transition-all duration-300 sm:h-16 sm:w-14",
+                  "group relative h-14 w-11 overflow-hidden border bg-paper-deep transition-all duration-300 sm:h-16 sm:w-14",
                   slideIndex === index
                     ? "border-gold opacity-100"
-                    : "border-white/10 opacity-45 hover:opacity-80",
+                    : "border-ink/15 opacity-50 hover:opacity-85",
                 )}
               >
                 <img
@@ -466,12 +466,12 @@ export function Hero({
             ))}
           </div>
 
-          <div className="mt-5 hidden items-center justify-between gap-3 border-t border-white/10 pt-3 sm:flex">
-            <span className="mono flex items-center gap-1.5 text-[7.5px] tracking-[0.16em] text-white/25">
+          <div className="mt-5 hidden items-center justify-between gap-3 border-t border-ink/10 pt-3 sm:flex">
+            <span className="mono flex items-center gap-1.5 text-[7.5px] tracking-[0.16em] text-ink-soft/45">
               <span className="inline-block size-1 bg-gold/70" />
               DRAG TO EXPLORE
             </span>
-            <span className="mono flex items-center gap-1 text-[7.5px] tracking-[0.16em] text-white/25">
+            <span className="mono flex items-center gap-1 text-[7.5px] tracking-[0.16em] text-ink-soft/45">
               SCROLL
               <ChevronDown className="size-3 text-gold/60" />
             </span>
@@ -479,7 +479,7 @@ export function Hero({
         </motion.div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-[#0d0d0d] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-paper to-transparent" />
     </section>
   );
 }

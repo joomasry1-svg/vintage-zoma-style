@@ -911,7 +911,7 @@ function ProductsPanel({
                 onChange={(event) =>
                   setDraft({ ...draft, inStock: event.target.checked })
                 }
-                className="size-3.5 accent-[#c5a059]"
+                className="size-3.5 accent-gold"
               />
               متوفر في المخزون
             </label>
@@ -2050,7 +2050,7 @@ function SettingsPanel({
                 onChange={(event) =>
                   setBanner({ ...banner, enabled: event.target.checked })
                 }
-                className="size-3.5 accent-[#c5a059]"
+                className="size-3.5 accent-gold"
               />
               مفعّل
             </label>
@@ -2207,7 +2207,7 @@ function SettingsPanel({
                       };
                       setMethods(next);
                     }}
-                    className="size-3.5 accent-[#c5a059]"
+                    className="size-3.5 accent-gold"
                   />
                   مفعّل
                 </label>

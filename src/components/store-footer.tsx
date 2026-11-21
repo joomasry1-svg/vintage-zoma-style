@@ -194,7 +194,7 @@ export function StoreFooter() {
             </Link>
             <Link
               to="/admin"
-              className="mono group inline-flex items-center gap-1.5 text-[9.5px] tracking-[0.04em] text-ink-soft/30 transition-colors hover:text-gold"
+              className="mono group inline-flex items-center gap-1.5 text-[9.5px] tracking-[0.04em] text-ink-soft/45 transition-colors hover:text-gold"
               aria-label="دخول لصاحب المتجر"
             >
               <Lock className="size-2.5 opacity-70" />

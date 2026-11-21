@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="theme-ivory">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="theme-color" content="#fbf7f2" />
   <meta
     name="description"
     content="Zoma store — معاطف صوف وجلد طبيعي وبدلات رجالية بقصّات دقيقة. تسوّق تشكيلة الشتاء، احجز جلسة قياس، واطلب عبر واتساب مع توصيل لكل محافظات مصر."
@@ -18,6 +18,14 @@
     rel="stylesheet"
   />
   <title>Zoma store — ملابس رجالية مختارة بعناية</title>
+  <script>
+    // Apply the saved palette before the first paint to avoid a flash.
+    try {
+      if (localStorage.getItem("zoma-theme") === "obsidian") {
+        document.documentElement.classList.remove("theme-ivory");
+      }
+    } catch (error) {}
+  </script>
 </head>
 
 

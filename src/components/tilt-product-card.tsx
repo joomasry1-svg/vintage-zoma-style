@@ -34,7 +34,7 @@ export function TiltProductCard({
   const rotateY = useSpring(0, { stiffness: 160, damping: 18, mass: 0.4 });
   const glowX = useMotionValue(50);
   const glowY = useMotionValue(50);
-  const glow = useMotionTemplate`radial-gradient(420px circle at ${glowX}% ${glowY}%, rgba(197,160,89,0.22), transparent 65%)`;
+  const glow = useMotionTemplate`radial-gradient(420px circle at ${glowX}% ${glowY}%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 65%)`;
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     if (reduceMotion) return;
@@ -75,7 +75,7 @@ export function TiltProductCard({
           transformStyle: "preserve-3d",
           willChange: "transform",
         }}
-        className="relative flex h-full flex-col border border-white/12 bg-[#141414] transition-colors duration-500 hover:border-gold/55"
+        className="relative flex h-full flex-col border border-ink/10 bg-card transition-colors duration-500 hover:border-gold/55"
       >
         <motion.div
           aria-hidden="true"
@@ -86,7 +86,7 @@ export function TiltProductCard({
         <div className="relative overflow-hidden">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-gold to-transparent opacity-70" />
 
-          <div className="relative aspect-[4/5] overflow-hidden bg-[#1a1a1a]">
+          <div className="relative aspect-[4/5] overflow-hidden bg-paper-deep">
             {product.imageUrl ? (
               <>
                 <motion.img
@@ -120,7 +120,7 @@ export function TiltProductCard({
                 )}
               </>
             ) : (
-              <div className="flex h-full items-center justify-center bg-[#1a1a1a] text-[10px] uppercase tracking-[0.2em] text-white/30">
+              <div className="flex h-full items-center justify-center bg-paper-deep text-[10px] uppercase tracking-[0.2em] text-ink-soft/40">
                 Zoma archive
               </div>
             )}
@@ -133,7 +133,7 @@ export function TiltProductCard({
                 {categoryLabel(product.category, categories)}
               </span>
               {product.discount > 0 && (
-                <span className="shimmer-sweep mono bg-gold px-2 py-1 text-[8px] font-bold tracking-[0.06em] text-black">
+                <span className="shimmer-sweep mono bg-gold px-2 py-1 text-[8px] font-bold tracking-[0.06em] text-espresso">
                   VIP −{product.discount}%
                 </span>
               )}
@@ -161,7 +161,7 @@ export function TiltProductCard({
                 <button
                   type="button"
                   onClick={() => onQuickView(product)}
-                  className="flex h-9 items-center justify-center gap-1.5 border border-gold/45 bg-gold/10 text-[9px] text-gold backdrop-blur transition-colors hover:bg-gold hover:text-black"
+                  className="flex h-9 items-center justify-center gap-1.5 border border-gold/45 bg-gold/10 text-[9px] text-gold backdrop-blur transition-colors hover:bg-gold hover:text-espresso"
                 >
                   <Plus className="size-3" />
                   اختر المقاس
@@ -169,7 +169,7 @@ export function TiltProductCard({
                 <Link
                   to={`/product/${product.id}`}
                   aria-label={`تفاصيل ${product.name}`}
-                  className="flex size-9 items-center justify-center bg-gold text-black transition-colors hover:bg-gold-soft"
+                  className="flex size-9 items-center justify-center bg-gold text-espresso transition-colors hover:bg-gold-soft"
                 >
                   <ArrowUpLeft className="size-3.5" />
                 </Link>
@@ -178,17 +178,17 @@ export function TiltProductCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-white/10 px-4 py-3">
-          <span className="mono text-[7.5px] tracking-[0.18em] text-white/25">
+        <div className="flex items-center justify-between gap-2 border-t border-ink/10 px-4 py-3">
+          <span className="mono text-[7.5px] tracking-[0.18em] text-ink-soft/45">
             LOOK / 0{index + 1}
           </span>
           <div className="flex items-center gap-2">
             {product.discount > 0 && (
-              <span className="price-strike mono text-[8px] text-white/30">
+              <span className="price-strike mono text-[8px] text-ink-soft/50">
                 {formatPrice(product.price)}
               </span>
             )}
-            <span className="mono text-[8px] tracking-[0.12em] text-white/55">
+            <span className="mono text-[8px] tracking-[0.12em] text-ink-soft/70">
               {product.sizes.length} SIZES
             </span>
           </div>

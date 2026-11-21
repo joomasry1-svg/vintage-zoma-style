@@ -4,8 +4,8 @@
   "description": "تسوّق المعاطف والبدلات والقمصان، احجز جلسة قياس، واطلب عبر واتساب.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#0d0d0d",
+  "background_color": "#fbf7f2",
+  "theme_color": "#fbf7f2",
   "icons": [
     {
       "src": "/logo.svg",
