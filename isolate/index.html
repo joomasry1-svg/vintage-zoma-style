@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="theme-ivory">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/logo.svg" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0d0d0d" />
+  <meta name="theme-color" content="#fbf7f2" />
   <meta
     name="description"
-    content="Zoma store — معاطف صوف وجلد طبيعي وبدلات رجالية بقصّات دقيقة. تسوّق تشكيلة الشتاء، احجز جلسة قياس، واطلب عبر واتساب مع توصيل لكل محافظات مصر."
+    content="Zoma store — معاطف صوف وجلد طبيعي وبدلات رجالية بقصّات دقيقة. تسوّق تشكيلة الشتاء واطلب عبر واتساب مع توصيل لكل محافظات مصر."
   />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,12 +18,20 @@
     rel="stylesheet"
   />
   <title>Zoma store — ملابس رجالية مختارة بعناية</title>
-  <script type="module" crossorigin src="/assets/index-DDb_3VQX.js"></script>
+  <script>
+    // Apply the saved palette before the first paint to avoid a flash.
+    try {
+      if (localStorage.getItem("zoma-theme") === "obsidian") {
+        document.documentElement.classList.remove("theme-ivory");
+      }
+    } catch (error) {}
+  </script>
+  <script type="module" crossorigin src="/assets/index-DYNQ43e5.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/react-vendor-DzeyujRg.js">
   <link rel="modulepreload" crossorigin href="/assets/framer-motion-DT6aXQC7.js">
-  <link rel="modulepreload" crossorigin href="/assets/radix-ui-BcRP3Wvm.js">
-  <link rel="modulepreload" crossorigin href="/assets/charts-VVDGqN5c.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-BoiqHLOM.css">
+  <link rel="modulepreload" crossorigin href="/assets/radix-ui-B05DiPbH.js">
+  <link rel="modulepreload" crossorigin href="/assets/charts-BWsmr-lb.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-PGxvHn1u.css">
 </head>
 
 
