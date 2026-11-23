@@ -90,6 +90,7 @@ export type Product = {
   keywords: string[];
   imageUrl?: string;
   secondImageUrl?: string;
+  ownerNote?: string;
 };
 
 const BASE_PRODUCTS: Product[] = [

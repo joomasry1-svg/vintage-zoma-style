@@ -70,6 +70,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       keywords: doc.keywords,
       imageUrl: doc.imageUrl,
       secondImageUrl: doc.secondImageUrl,
+      ownerNote: doc.ownerNote,
     }));
   }, [productsQuery, storeIsSeeded]);
 

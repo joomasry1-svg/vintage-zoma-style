@@ -13,7 +13,8 @@ import {
 } from "@/lib/store-helpers";
 import { SiteLayout } from "@/components/site-layout";
 import { ProductVisual } from "@/components/product-visual";
-import { SizeGuide } from "@/components/size-guide";
+import { ProductSizePicker } from "@/components/size-guide";
+import { getSizeLabel } from "@/lib/size-guide";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,7 @@ export default function ProductDetail() {
   const product = products.find((item) => item.id === slug);
 
   const [size, setSize] = useState("");
+  const [sizeLabel, setSizeLabel] = useState("");
   const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
   const [zoom, setZoom] = useState(false);
@@ -45,6 +47,9 @@ export default function ProductDetail() {
   const [reviewText, setReviewText] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [ownerToken, setOwnerToken] = useState<string | null>(null);
+  const [ownerNoteDraft, setOwnerNoteDraft] = useState("");
+  const [isSavingOwnerNote, setIsSavingOwnerNote] = useState(false);
 
   const reviews =
     useQuery(
@@ -52,10 +57,25 @@ export default function ProductDetail() {
       slug ? { productSlug: slug } : "skip",
     ) ?? [];
   const createReview = useMutation(api.store.createReview);
+  const saveOwnerNote = useMutation(api.admin.setProductOwnerNote);
+
+  useEffect(() => {
+    try {
+      setOwnerToken(window.localStorage.getItem("zoma-admin-token"));
+    } catch {
+      setOwnerToken(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    setOwnerNoteDraft(product?.ownerNote ?? "");
+  }, [product?.id, product?.ownerNote]);
 
   useEffect(() => {
     if (!product) return;
-    setSize(product.sizes[0] ?? "");
+    const firstSize = product.sizes[0] ?? "";
+    setSize(firstSize);
+    setSizeLabel(getSizeLabel(product, firstSize, "standard"));
     setColor(product.colors[0]?.name ?? "");
     setQty(1);
     setZoom(false);
@@ -99,11 +119,34 @@ export default function ProductDetail() {
 
   const addToCart = () => {
     if (!size || !color) return;
-    cart.addItem({ productId: product.id, size, color, qty });
+    const orderSize = sizeLabel || getSizeLabel(product, size, "standard");
+    cart.addItem({ productId: product.id, size: orderSize, color, qty });
     cart.openCart();
     toast.success("أُضيفت القطعة إلى الحقيبة", {
-      description: `${product.name} · المقاس ${size}`,
+      description: `${product.name} · المقاس ${orderSize}`,
     });
+  };
+
+  const submitOwnerNote = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    if (!ownerToken) return;
+    setIsSavingOwnerNote(true);
+    try {
+      await saveOwnerNote({
+        token: ownerToken,
+        slug: product.id,
+        note: ownerNoteDraft,
+      });
+      toast.success("تم حفظ تعليق صاحب المتجر");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "تعذّر حفظ التعليق.",
+      );
+    } finally {
+      setIsSavingOwnerNote(false);
+    }
   };
 
   const submitReview = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -257,33 +300,70 @@ export default function ProductDetail() {
               <span className="text-gold">القماش:</span> {product.fabric}
             </p>
 
-            <div className="mt-6">
-              <div className="flex items-baseline justify-between">
-                <p className="text-[11px] font-medium text-ink">المقاس</p>
-                <span className="text-[9px] text-ink-soft/45">
-                  القياسات تظهر فور اختيار المقاس
-                </span>
+            {product.ownerNote && (
+              <div className="mt-5 border-e-2 border-gold bg-gold/[0.05] px-4 py-3">
+                <p className="mono text-[8px] tracking-[0.16em] text-gold">
+                  FROM THE OWNER / ملاحظة صاحب المتجر
+                </p>
+                <p className="mt-1.5 text-[12px] leading-7 text-ink-soft/80">
+                  {product.ownerNote}
+                </p>
               </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {product.sizes.map((option) => (
+            )}
+
+            {ownerToken && (
+              <form
+                onSubmit={submitOwnerNote}
+                className="mt-4 border border-dashed border-gold/30 bg-card p-3.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[10.5px] font-medium text-ink">
+                    تعليق صاحب المتجر
+                  </p>
+                  <span className="mono text-[7.5px] tracking-[0.14em] text-gold">
+                    OWNER ONLY
+                  </span>
+                </div>
+                <p className="mt-1 text-[8.5px] leading-4 text-ink-soft/45">
+                  يظهر هذا التعليق لكل الزوار تحت وصف المنتج.
+                </p>
+                <Textarea
+                  value={ownerNoteDraft}
+                  onChange={(event) => setOwnerNoteDraft(event.target.value)}
+                  placeholder="اكتب ملاحظة عن القطعة، الخامة، أو طريقة التنسيق..."
+                  rows={3}
+                  maxLength={600}
+                  className="mt-2 resize-none rounded-none border-ink/15 bg-paper-deep text-[11px]"
+                />
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="mono text-[8px] text-ink-soft/35">
+                    {ownerNoteDraft.length}/600
+                  </span>
                   <button
-                    key={option}
-                    type="button"
-                    onClick={() => setSize(option)}
-                    aria-pressed={size === option}
-                    className={cn(
-                      "mono min-w-12 border px-3 py-2.5 text-[11px] transition-colors",
-                      size === option
-                        ? "border-gold bg-gold text-espresso"
-                        : "border-ink/15 text-ink hover:border-ink/40",
-                    )}
+                    type="submit"
+                    disabled={isSavingOwnerNote}
+                    className="flex h-8 items-center gap-1.5 bg-gold px-3 text-[9px] font-semibold text-espresso disabled:opacity-50"
                   >
-                    {option}
+                    {isSavingOwnerNote && (
+                      <Loader2 className="size-3 animate-spin" />
+                    )}
+                    حفظ التعليق
                   </button>
-                ))}
-              </div>
-              {size && <SizeGuide product={product} size={size} />}
-            </div>
+                </div>
+              </form>
+            )}
+
+            {size && (
+              <ProductSizePicker
+                key={product.id}
+                product={product}
+                value={size}
+                onChange={(nextSize, nextLabel) => {
+                  setSize(nextSize);
+                  setSizeLabel(nextLabel);
+                }}
+              />
+            )}
 
             <div className="mt-5">
               <p className="text-[11px] font-medium text-ink">
@@ -353,7 +433,7 @@ export default function ProductDetail() {
 
             <a
               href={whatsappLink(
-                `مرحباً ${settings.storeName}، أريد طلب: ${product.name} — المقاس ${size} — اللون ${color} — الكمية ${qty}.`,
+                `مرحباً ${settings.storeName}، أريد طلب: ${product.name} — المقاس ${sizeLabel || size} — اللون ${color} — الكمية ${qty}.`,
                 settings.whatsapp,
               )}
               target="_blank"

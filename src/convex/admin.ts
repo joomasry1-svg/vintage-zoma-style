@@ -294,6 +294,28 @@ export const saveProduct = mutation({
   },
 });
 
+export const setProductOwnerNote = mutation({
+  args: {
+    token: v.string(),
+    slug: v.string(),
+    note: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await assertAdmin(ctx, args.token);
+    const product = await ctx.db
+      .query("products")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+    if (!product) throw new Error("المنتج غير موجود.");
+
+    const note = args.note.trim().slice(0, 600);
+    await ctx.db.patch(product._id, {
+      ownerNote: note || undefined,
+    });
+    return { ok: true, note };
+  },
+});
+
 export const deleteProduct = mutation({
   args: { token: v.string(), id: v.id("products") },
   handler: async (ctx, args) => {

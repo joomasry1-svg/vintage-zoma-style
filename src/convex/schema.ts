@@ -61,6 +61,7 @@ const schema = defineSchema(
       keywords: v.array(v.string()),
       imageUrl: v.optional(v.string()),
       secondImageUrl: v.optional(v.string()),
+      ownerNote: v.optional(v.string()),
       position: v.number(),
     })
       .index("by_slug", ["slug"])

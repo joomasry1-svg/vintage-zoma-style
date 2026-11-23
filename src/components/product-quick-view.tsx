@@ -9,7 +9,8 @@ import {
   whatsappLink,
 } from "@/lib/store-helpers";
 import { ProductVisual } from "@/components/product-visual";
-import { SizeGuide } from "@/components/size-guide";
+import { ProductSizePicker } from "@/components/size-guide";
+import { getSizeLabel } from "@/lib/size-guide";
 import {
   Dialog,
   DialogContent,
@@ -44,17 +45,20 @@ export function ProductQuickView({
 }) {
   const { settings, categories } = useStore();
   const [size, setSize] = useState("");
+  const [sizeLabel, setSizeLabel] = useState("");
   const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
   const [zoom, setZoom] = useState(false);
 
   useEffect(() => {
     if (!product) return;
-    setSize(product.sizes[0] ?? "");
+    const firstSize = product.sizes[0] ?? "";
+    setSize(firstSize);
+    setSizeLabel(getSizeLabel(product, firstSize, "standard"));
     setColor(product.colors[0]?.name ?? "");
     setQty(1);
     setZoom(false);
-  }, [product]);
+  }, [product?.id]);
 
   if (!product) return null;
 
@@ -145,32 +149,18 @@ export function ProductQuickView({
               <span className="text-gold">القماش:</span> {product.fabric}
             </p>
 
-            <div className="mt-5">
-              <div className="flex items-baseline justify-between">
-                <p className="text-[11px] font-medium text-ink">المقاس</p>
-                <span className="text-[9px] text-ink-soft/40">
-                  اضغط مقاساً لعرض القياسات
-                </span>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {product.sizes.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => setSize(option)}
-                    className={cn(
-                      "mono min-w-11 border px-3 py-2 text-[11px] transition-colors",
-                      size === option
-                        ? "border-gold bg-gold text-espresso"
-                        : "border-ink/20 text-ink hover:border-ink/50",
-                    )}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-              {size && <SizeGuide compact product={product} size={size} />}
-            </div>
+            {size && (
+              <ProductSizePicker
+                key={product.id}
+                compact
+                product={product}
+                value={size}
+                onChange={(nextSize, nextLabel) => {
+                  setSize(nextSize);
+                  setSizeLabel(nextLabel);
+                }}
+              />
+            )}
 
             <div className="mt-5">
               <p className="text-[11px] font-medium text-ink">
@@ -243,7 +233,14 @@ export function ProductQuickView({
             <div className="mt-6 flex flex-col gap-2">
               <button
                 type="button"
-                onClick={() => onAdd({ product, size, color, qty })}
+                onClick={() =>
+                  onAdd({
+                    product,
+                    size: sizeLabel || getSizeLabel(product, size, "standard"),
+                    color,
+                    qty,
+                  })
+                }
                 disabled={!size || !color || !product.inStock}
                 className="h-12 w-full bg-gold text-[11px] font-semibold tracking-[0.1em] text-espresso transition-opacity hover:opacity-90 disabled:opacity-40"
               >

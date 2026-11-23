@@ -45,6 +45,7 @@ export const productInputValidator = v.object({
   keywords: v.array(v.string()),
   imageUrl: v.optional(v.string()),
   secondImageUrl: v.optional(v.string()),
+  ownerNote: v.optional(v.string()),
 });
 
 export const orderStatusValidator = v.union(
