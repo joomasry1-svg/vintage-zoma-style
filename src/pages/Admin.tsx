@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
-import { useConvex, useMutation, useQuery } from "convex/react";
+import { useAction, useConvex, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import {
@@ -9,8 +9,14 @@ import {
   type CategoryId,
   type GarmentKind,
   type HeroSlide,
+  type Product,
   type PromoBanner,
 } from "@/data/store";
+import {
+  getSizeChoices,
+  getSizeDetails,
+  stripUnit,
+} from "@/lib/size-guide";
 import {
   BOOKING_STATUS_LABELS,
   formatDateTime,
@@ -27,12 +33,15 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  Film,
   LayoutGrid,
+  Loader2,
   LogOut,
   ImagePlus,
   MessageSquare,
   Package,
   Pencil,
+  Play,
   Plus,
   Settings,
   Tag,
@@ -96,6 +105,15 @@ type AdminSettings = {
   updatedAt: number;
 };
 
+type SizeOverrideMap = Record<string, Record<string, string>>;
+
+type VideoDraft = {
+  playbackId: string;
+  assetId?: string;
+  aspectRatio?: string;
+  duration?: number;
+};
+
 type ProductDraft = {
   id?: Id<"products">;
   name: string;
@@ -113,7 +131,17 @@ type ProductDraft = {
   keywords: string;
   imageUrl: string;
   secondImageUrl: string;
+  gallery: string[];
+  video: VideoDraft | null;
+  sizeOverrides: SizeOverrideMap;
 };
+
+function parseProductSizes(value: string) {
+  return value
+    .split(/[,،\n]/)
+    .map((size) => size.trim())
+    .filter(Boolean);
+}
 
 const EMPTY_DRAFT: ProductDraft = {
   name: "",
@@ -131,6 +159,9 @@ const EMPTY_DRAFT: ProductDraft = {
   keywords: "",
   imageUrl: "",
   secondImageUrl: "",
+  gallery: [],
+  video: null,
+  sizeOverrides: {},
 };
 
 export default function Admin() {
@@ -587,8 +618,10 @@ function ProductsPanel({
   const saveProduct = useMutation(api.admin.saveProduct);
   const deleteProduct = useMutation(api.admin.deleteProduct);
   const [isSaving, setIsSaving] = useState(false);
+  const [isVideoBusy, setIsVideoBusy] = useState(false);
 
   const startEdit = (product: Doc<"products">) => {
+    setIsVideoBusy(false);
     setDraft({
       id: product._id,
       name: product.name,
@@ -608,12 +641,31 @@ function ProductsPanel({
       keywords: product.keywords.join(", "),
       imageUrl: product.imageUrl ?? "",
       secondImageUrl: product.secondImageUrl ?? "",
+      gallery: product.gallery ?? [],
+      video: product.videoPlaybackId
+        ? {
+            playbackId: product.videoPlaybackId,
+            assetId: product.videoAssetId,
+            aspectRatio: product.videoAspectRatio,
+            duration: product.videoDuration,
+          }
+        : null,
+      sizeOverrides: Object.fromEntries(
+        (product.sizeOverrides ?? []).map((entry) => [
+          entry.size,
+          entry.values,
+        ]),
+      ),
     });
   };
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!draft) return;
+    if (isVideoBusy) {
+      toast.error("انتظر حتى ينتهي رفع ومعالجة الفيديو أولاً.");
+      return;
+    }
     setIsSaving(true);
     try {
       const price = Number(draft.price);
@@ -630,6 +682,18 @@ function ProductsPanel({
           return { name: name.trim(), hex: (hex || draft.tone).trim() };
         })
         .filter((color) => color.name);
+      const sizes = parseProductSizes(draft.sizes);
+      if (sizes.length === 0) throw new Error("أضف مقاساً واحداً على الأقل.");
+      const sizeOverrides = sizes
+        .map((size) => ({
+          size,
+          values: Object.fromEntries(
+            Object.entries(draft.sizeOverrides[size] ?? {})
+              .map(([key, value]) => [key, value.trim()] as const)
+              .filter(([, value]) => Boolean(value)),
+          ),
+        }))
+        .filter((entry) => Object.keys(entry.values).length > 0);
 
       await saveProduct({
         token,
@@ -642,17 +706,27 @@ function ProductsPanel({
           fabric: draft.fabric.trim(),
           price,
           discount,
-          sizes: draft.sizes.split(/[,،\n]/).map((size) => size.trim()),
+          sizes,
           colors,
           tone: draft.tone,
           badge: draft.badge || undefined,
           inStock: draft.inStock,
-          keywords: draft.keywords.split(/[,،\n]/),
+          keywords: draft.keywords
+            .split(/[,،\n]/)
+            .map((keyword) => keyword.trim())
+            .filter(Boolean),
           imageUrl: draft.imageUrl.trim() || undefined,
           secondImageUrl: draft.secondImageUrl.trim() || undefined,
+          gallery: draft.gallery.map((image) => image.trim()).filter(Boolean),
+          videoPlaybackId: draft.video?.playbackId,
+          videoAssetId: draft.video?.assetId,
+          videoAspectRatio: draft.video?.aspectRatio,
+          videoDuration: draft.video?.duration,
+          sizeOverrides,
         },
       });
       toast.success(draft.id ? "تم تحديث المنتج" : "تمت إضافة المنتج");
+      setIsVideoBusy(false);
       setDraft(null);
     } catch (error) {
       toast.error(
@@ -687,12 +761,13 @@ function ProductsPanel({
         </div>
         <button
           type="button"
-          onClick={() =>
+          onClick={() => {
+            setIsVideoBusy(false);
             setDraft({
               ...EMPTY_DRAFT,
               category: categories[0]?.slug ?? "outerwear",
-            })
-          }
+            });
+          }}
           className="flex h-10 items-center gap-2 bg-gold px-4 text-[10.5px] font-semibold text-espresso"
         >
           <Plus className="size-3.5" />
@@ -780,6 +855,23 @@ function ProductsPanel({
             />
           </div>
 
+          <div className="mt-3">
+            <GalleryUploader
+              token={token}
+              values={draft.gallery}
+              onChange={(gallery) => setDraft({ ...draft, gallery })}
+            />
+          </div>
+
+          <div className="mt-3">
+            <VideoUpload
+              token={token}
+              value={draft.video}
+              onChange={(video) => setDraft({ ...draft, video })}
+              onBusyChange={setIsVideoBusy}
+            />
+          </div>
+
           <div className="mt-3 grid gap-3 sm:grid-cols-4">
             <Field label="السعر قبل الخصم">
               <Input
@@ -844,6 +936,13 @@ function ProductsPanel({
               />
             </Field>
           </div>
+
+          <SizeOverrideEditor
+            draft={draft}
+            onChange={(sizeOverrides) =>
+              setDraft({ ...draft, sizeOverrides })
+            }
+          />
 
           <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
             <Field label="الألوان — كل لون في سطر: الاسم:#اللون">
@@ -942,10 +1041,14 @@ function ProductsPanel({
               </button>
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={isSaving || isVideoBusy}
                 className="h-10 bg-gold px-5 text-[10.5px] font-semibold text-espresso disabled:opacity-50"
               >
-                {isSaving ? "جارٍ الحفظ…" : "حفظ المنتج"}
+                {isSaving
+                  ? "جارٍ الحفظ…"
+                  : isVideoBusy
+                    ? "انتظر معالجة الفيديو…"
+                    : "حفظ المنتج"}
               </button>
             </div>
           </div>
@@ -2463,6 +2566,603 @@ function ImageUpload({
           if (file) void handleFile(file);
         }}
       />
+    </div>
+  );
+}
+
+function GalleryUploader({
+  token,
+  values,
+  onChange,
+}: {
+  token: string;
+  values: string[];
+  onChange: (values: string[]) => void;
+}) {
+  const convex = useConvex();
+  const generateUploadUrl = useMutation(api.admin.generateMediaUploadUrl);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [error, setError] = useState<string | null>(null);
+  const maxImages = 8;
+
+  const handleFiles = async (files: FileList) => {
+    setError(null);
+    const list = Array.from(files).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    if (list.length === 0) {
+      setError("اختر صوراً فقط.");
+      return;
+    }
+    if (values.length + list.length > maxImages) {
+      setError(`يمكن إضافة ${maxImages} صور إضافية كحد أقصى.`);
+      return;
+    }
+    if (list.some((file) => file.size > 8 * 1024 * 1024)) {
+      setError("كل صورة يجب أن تكون أصغر من ٨ ميجابايت.");
+      return;
+    }
+
+    setIsUploading(true);
+    const next = [...values];
+    try {
+      for (let index = 0; index < list.length; index += 1) {
+        setProgress({ done: index, total: list.length });
+        const file = list[index];
+        const uploadUrl = await generateUploadUrl({ token });
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        if (!response.ok) throw new Error("تعذّر رفع إحدى الصور.");
+        const payload = (await response.json()) as { storageId?: string };
+        if (!payload.storageId) throw new Error("لم يصل معرّف الصورة.");
+        const url = await convex.query(api.admin.mediaUrl, {
+          token,
+          storageId: payload.storageId as Id<"_storage">,
+        });
+        if (!url) throw new Error("تعذّر تجهيز رابط الصورة.");
+        next.push(url);
+        onChange([...next]);
+      }
+      setProgress({ done: list.length, total: list.length });
+      toast.success("تمت إضافة صور المنتج");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "تعذّر رفع الصور.",
+      );
+    } finally {
+      setIsUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="border border-ink/10 bg-paper-deep/25 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-[10.5px] font-medium text-ink">
+            صور إضافية وزوايا المنتج
+          </p>
+          <p className="mt-0.5 text-[8.5px] text-ink-soft/45">
+            أضف صورة الخلف والجانب ليتيح للعميل تدوير القطعة. حتى ٨ صور.
+          </p>
+        </div>
+        <span className="mono text-[8px] text-ink-soft/40">
+          {values.length}/{maxImages}
+        </span>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
+        {values.map((value, index) => (
+          <div
+            key={`${value}-${index}`}
+            className="group relative aspect-square overflow-hidden border border-ink/15 bg-card"
+          >
+            <img src={value} alt="" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => onChange(values.filter((_, i) => i !== index))}
+              className="absolute end-1 top-1 flex size-6 items-center justify-center bg-black/65 text-white opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
+              aria-label="إزالة الصورة"
+            >
+              <X className="size-3" />
+            </button>
+          </div>
+        ))}
+        {values.length < maxImages && (
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={isUploading}
+            className="flex aspect-square flex-col items-center justify-center gap-1 border border-dashed border-gold/40 bg-gold/[0.04] text-[8.5px] text-gold transition-colors hover:bg-gold/[0.09] disabled:opacity-50"
+          >
+            {isUploading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ImagePlus className="size-4" />
+            )}
+            {isUploading
+              ? `${progress.done}/${progress.total}`
+              : "إضافة صور"}
+          </button>
+        )}
+      </div>
+
+      {error && (
+        <p className="mt-2 text-[9px] leading-4 text-destructive">{error}</p>
+      )}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(event) => {
+          if (event.target.files?.length) void handleFiles(event.target.files);
+        }}
+      />
+    </div>
+  );
+}
+
+function VideoUpload({
+  token,
+  value,
+  onChange,
+  onBusyChange,
+}: {
+  token: string;
+  value: VideoDraft | null;
+  onChange: (value: VideoDraft | null) => void;
+  onBusyChange: (busy: boolean) => void;
+}) {
+  const createUpload = useAction(api.mux.createProductVideoUpload);
+  const getStatus = useAction(api.mux.getProductVideoUploadStatus);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const alive = useRef(true);
+  const maxBytes = 1024 * 1024 * 1024;
+
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+      onBusyChange(false);
+    };
+  }, [onBusyChange]);
+
+  const uploadWithProgress = (url: string, file: File) =>
+    new Promise<void>((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open("PUT", url);
+      request.setRequestHeader("Content-Type", file.type || "video/mp4");
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          setProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      };
+      request.onload = () => {
+        if (request.status >= 200 && request.status < 300) resolve();
+        else reject(new Error("تعذّر رفع الفيديو إلى Mux."));
+      };
+      request.onerror = () => reject(new Error("انقطع الاتصال أثناء رفع الفيديو."));
+      request.send(file);
+    });
+
+  const handleFile = async (file: File) => {
+    setError(null);
+    if (!file.type.startsWith("video/")) {
+      setError("اختر ملف فيديو.");
+      return;
+    }
+    if (file.size > maxBytes) {
+      setError("الحد الأقصى لحجم الفيديو هو ١ جيجابايت.");
+      return;
+    }
+
+    setIsUploading(true);
+    onBusyChange(true);
+    setProgress(0);
+    setStatus("تجهيز رابط رفع آمن…");
+    try {
+      const created = await createUpload({ token });
+      setStatus("جارٍ رفع الفيديو مباشرة إلى Mux…");
+      await uploadWithProgress(created.url, file);
+      setProgress(100);
+      setStatus("اكتمل الرفع — جارٍ تحويل الفيديو للبث…");
+
+      for (let attempt = 0; attempt < 300; attempt += 1) {
+        const result = await getStatus({ token, uploadId: created.id });
+        if (result.status === "ready" && result.playbackId) {
+          if (!alive.current) return;
+          onChange({
+            playbackId: result.playbackId,
+            assetId: result.assetId,
+            aspectRatio: result.aspectRatio,
+            duration: result.duration,
+          });
+          setStatus("");
+          toast.success("تم تجهيز فيديو المنتج");
+          return;
+        }
+        if (result.status === "errored" || result.status === "cancelled") {
+          throw new Error(result.message || "تعذّرت معالجة الفيديو.");
+        }
+        if (typeof result.progress === "number") {
+          setStatus(`جارٍ تحويل الفيديو… ${Math.round(result.progress)}%`);
+        } else {
+          setStatus("جارٍ تحويل الفيديو للبث…");
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 4000));
+      }
+      throw new Error("استغرقت معالجة الفيديو وقتاً أطول من المتوقع.");
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "تعذّر رفع الفيديو.",
+      );
+      setStatus("");
+    } finally {
+      setIsUploading(false);
+      onBusyChange(false);
+      setProgress(0);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  return (
+    <div className="border border-ink/10 bg-paper-deep/25 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="flex items-center gap-1.5 text-[10.5px] font-medium text-ink">
+            <Film className="size-3.5 text-gold" />
+            فيديو المنتج
+          </p>
+          <p className="mt-0.5 text-[8.5px] text-ink-soft/45">
+            ارفع فيديو حتى ١ جيجابايت. يتم التحويل والبث بجودة متجاوبة عبر Mux.
+            يتطلب تفعيل MUX_TOKEN_ID وMUX_TOKEN_SECRET.
+          </p>
+        </div>
+        <span className="mono text-[7.5px] tracking-[0.12em] text-gold">
+          OWNER / MUX
+        </span>
+      </div>
+
+      {value ? (
+        <div className="mt-3 flex flex-wrap items-center gap-3 border border-gold/20 bg-card p-2">
+          <div className="relative aspect-video w-28 overflow-hidden bg-black">
+            <img
+              src={`https://image.mux.com/${value.playbackId}/thumbnail.webp?width=480&time=0`}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <Play className="size-5 fill-white/90 text-white/90" />
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] text-ink">فيديو جاهز للعرض</p>
+            <p className="mono mt-0.5 truncate text-[8px] text-ink-soft/40">
+              {value.playbackId}
+            </p>
+            <p className="mono mt-0.5 text-[8px] text-gold">
+              {value.duration ? formatVideoDuration(value.duration) : "MUX STREAM"}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={isUploading}
+              className="h-8 border border-gold/40 px-2.5 text-[8.5px] text-gold hover:bg-gold hover:text-espresso disabled:opacity-50"
+            >
+              استبدال
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange(null)}
+              disabled={isUploading}
+              className="flex size-8 items-center justify-center border border-ink/15 text-ink-soft/40 hover:text-destructive"
+              aria-label="حذف الفيديو"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={isUploading}
+          className="mt-3 flex h-12 w-full items-center justify-center gap-2 border border-dashed border-gold/40 bg-gold/[0.04] text-[10px] text-gold transition-colors hover:bg-gold/[0.09] disabled:opacity-50"
+        >
+          {isUploading ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Upload className="size-4" />
+          )}
+          {isUploading ? "جارٍ رفع الفيديو…" : "رفع أو تصوير فيديو للمنتج"}
+        </button>
+      )}
+
+      {(isUploading || status) && (
+        <div className="mt-2 border border-ink/10 bg-card px-3 py-2">
+          <div className="flex items-center justify-between gap-2 text-[8.5px] text-ink-soft/60">
+            <span>{status || "جارٍ الرفع…"}</span>
+            {progress > 0 && progress < 100 && (
+              <span className="mono text-gold">{progress}%</span>
+            )}
+          </div>
+          <div className="mt-1.5 h-1 overflow-hidden bg-ink/10">
+            <div
+              className="h-full bg-gold transition-all"
+              style={{
+                width:
+                  progress < 100 && status.includes("تحويل")
+                    ? "82%"
+                    : `${progress}%`,
+              }}
+            />
+          </div>
+          <p className="mt-1 text-[8px] text-ink-soft/35">
+            لا تغلق الصفحة أثناء الرفع. فيديو ١ جيجابايت قد يستغرق عدة دقائق.
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <p className="mt-2 text-[9px] leading-4 text-destructive">{error}</p>
+      )}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void handleFile(file);
+        }}
+      />
+    </div>
+  );
+}
+
+function formatVideoDuration(seconds: number) {
+  const total = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(total / 60);
+  return `${minutes}:${String(total % 60).padStart(2, "0")}`;
+}
+
+function SizeOverrideEditor({
+  draft,
+  onChange,
+}: {
+  draft: ProductDraft;
+  onChange: (value: SizeOverrideMap) => void;
+}) {
+  const sizes = parseProductSizes(draft.sizes);
+  const [selected, setSelected] = useState(sizes[0] ?? "");
+  const sizeKey = sizes.join("|");
+
+  useEffect(() => {
+    if (!sizes.includes(selected)) setSelected(sizes[0] ?? "");
+  }, [sizeKey]);
+
+  if (sizes.length === 0) {
+    return (
+      <div className="mt-3 border border-dashed border-ink/15 px-3 py-4 text-[9.5px] text-ink-soft/45">
+        أضف المقاسات أولاً لتتمكن من تعديل قياساتها.
+      </div>
+    );
+  }
+
+  const base: Product = {
+    id: "draft",
+    name: draft.name || "منتج جديد",
+    category: draft.category,
+    kind: draft.kind,
+    description: draft.description,
+    fabric: draft.fabric,
+    price: Number(draft.price) || 0,
+    discount: 0,
+    sizes,
+    colors: [],
+    tone: draft.tone || "#1a1a1a",
+    inStock: draft.inStock,
+    keywords: [],
+  };
+  const details = getSizeDetails(base, selected);
+  const choices = getSizeChoices(base);
+  const overrides = draft.sizeOverrides[selected] ?? {};
+  const customSizes = Object.values(draft.sizeOverrides).filter(
+    (values) => Object.keys(values).length > 0,
+  ).length;
+
+  const updateValue = (key: string, rawValue: string) => {
+    const normalized = stripUnit(rawValue);
+    const defaultItem = [...details.summary, ...details.garment].find(
+      (item) => item.key === key,
+    );
+    const defaultValue = defaultItem
+      ? stripUnit(defaultItem.value)
+      : undefined;
+    const values = { ...overrides };
+    if (!normalized || normalized === defaultValue) delete values[key];
+    else values[key] = rawValue;
+
+    const next = { ...draft.sizeOverrides };
+    if (Object.keys(values).length === 0) delete next[selected];
+    else next[selected] = values;
+    onChange(next);
+  };
+
+  const resetSelected = () => {
+    const next = { ...draft.sizeOverrides };
+    delete next[selected];
+    onChange(next);
+  };
+
+  const groups = [
+    {
+      id: "body",
+      title: "قياسات الجسم المرجعية",
+      items: details.summary.map((metric) => ({
+        key: metric.key,
+        label: metric.label,
+        value: stripUnit(metric.value),
+      })),
+    },
+    {
+      id: "garment",
+      title: "قياسات القطعة نفسها",
+      items: details.garment.map((metric) => ({
+        key: metric.key,
+        label: metric.label,
+        value: stripUnit(metric.value),
+      })),
+    },
+  ];
+
+  return (
+    <div className="mt-4 border border-gold/20 bg-gold/[0.025] p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="mono text-[8.5px] tracking-[0.16em] text-gold">
+            SIZE MEASUREMENTS / OWNER
+          </p>
+          <p className="mt-1 text-[11px] text-ink">
+            قياسات كل مقاس — عدّل الرقم ليطابق قطعتك بالضبط
+          </p>
+          <p className="mt-1 max-w-xl text-[9px] leading-5 text-ink-soft/50">
+            القيم الظاهرة هي القياسات الافتراضية لـ Zoma. اضغط على أي رقم
+            واكتب البديل؛ تُحفظ التعديلات لهذا المقاس فقط وتظهر للعميل في صفحة
+            المنتج ونافذة المجسم.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onChange({})}
+          disabled={customSizes === 0}
+          className="h-8 border border-ink/15 px-2.5 text-[8.5px] text-ink-soft/55 hover:border-gold/50 hover:text-gold disabled:opacity-40"
+        >
+          مسح كل التعديلات
+        </button>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {sizes.map((size) => {
+          const choice = choices.find((item) => item.value === size);
+          const customized =
+            Object.keys(draft.sizeOverrides[size] ?? {}).length > 0;
+          return (
+            <button
+              key={size}
+              type="button"
+              onClick={() => setSelected(size)}
+              className={cn(
+                "relative flex h-9 min-w-10 items-center justify-center rounded-full border px-3 text-[10px] transition-colors",
+                selected === size
+                  ? "border-gold bg-gold text-espresso"
+                  : "border-ink/20 text-ink hover:border-gold/50",
+              )}
+            >
+              {choice?.standard ?? size}
+              {customized && (
+                <span
+                  className={cn(
+                    "absolute -end-0.5 -top-0.5 size-1.5 rounded-full",
+                    selected === size ? "bg-espresso" : "bg-gold",
+                  )}
+                />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-y border-ink/10 py-2">
+        <p className="text-[9px] text-ink-soft/50">
+          المقاس المحدد:{" "}
+          <span className="text-ink">
+            {choices.find((item) => item.value === selected)?.standard ??
+              selected}
+          </span>
+          {choices.find((item) => item.value === selected)?.eu !==
+            choices.find((item) => item.value === selected)?.standard && (
+            <span className="mono ms-2 text-gold">
+              EU {choices.find((item) => item.value === selected)?.eu}
+            </span>
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={resetSelected}
+          disabled={Object.keys(overrides).length === 0}
+          className="text-[8.5px] text-gold/75 hover:text-gold disabled:opacity-30"
+        >
+          إعادة قياسات هذا المقاس
+        </button>
+      </div>
+
+      <div className="mt-3 grid gap-4 lg:grid-cols-2">
+        {groups.map((group) => (
+          <div key={group.id}>
+            <p className="text-[9px] font-medium text-ink-soft/65">
+              {group.title}
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {group.items.map((item) => {
+                const isCustom = Object.prototype.hasOwnProperty.call(
+                  overrides,
+                  item.key,
+                );
+                return (
+                  <label key={item.key} className="block">
+                    <span className="mb-1 flex items-center gap-1 text-[8px] text-ink-soft/50">
+                      {item.label}
+                      {isCustom && (
+                        <span className="size-1.5 rounded-full bg-gold" />
+                      )}
+                    </span>
+                    <div className="relative">
+                      <Input
+                        value={overrides[item.key] ?? item.value}
+                        onChange={(event) =>
+                          updateValue(item.key, event.target.value)
+                        }
+                        dir="ltr"
+                        className={cn(
+                          "h-9 rounded-none bg-card text-[11px]",
+                          isCustom
+                            ? "border-gold/60 text-gold"
+                            : "border-ink/15 text-ink",
+                        )}
+                      />
+                      <span className="pointer-events-none absolute end-2 top-1/2 -translate-y-1/2 text-[7.5px] text-ink-soft/35">
+                        سم
+                      </span>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[8px] text-ink-soft/35">
+        يمكنك كتابة رقم واحد أو نطاق مثل 96–100. زر «مسح كل التعديلات» يعيد
+        جدول Zoma الافتراضي بالكامل.
+      </p>
     </div>
   );
 }

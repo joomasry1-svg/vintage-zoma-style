@@ -61,6 +61,19 @@ const schema = defineSchema(
       keywords: v.array(v.string()),
       imageUrl: v.optional(v.string()),
       secondImageUrl: v.optional(v.string()),
+      gallery: v.optional(v.array(v.string())),
+      videoPlaybackId: v.optional(v.string()),
+      videoAssetId: v.optional(v.string()),
+      videoAspectRatio: v.optional(v.string()),
+      videoDuration: v.optional(v.number()),
+      sizeOverrides: v.optional(
+        v.array(
+          v.object({
+            size: v.string(),
+            values: v.record(v.string(), v.string()),
+          }),
+        ),
+      ),
       ownerNote: v.optional(v.string()),
       position: v.number(),
     })

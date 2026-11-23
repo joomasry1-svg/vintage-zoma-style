@@ -12,6 +12,7 @@ import {
   whatsappLink,
 } from "@/lib/store-helpers";
 import { SiteLayout } from "@/components/site-layout";
+import { ProductGallery } from "@/components/product-gallery";
 import { ProductVisual } from "@/components/product-visual";
 import { ProductSizePicker } from "@/components/size-guide";
 import { getSizeLabel } from "@/lib/size-guide";
@@ -22,7 +23,6 @@ import {
   ArrowUpLeft,
   Check,
   Loader2,
-  Maximize2,
   MessageCircle,
   Minus,
   Plus,
@@ -42,7 +42,6 @@ export default function ProductDetail() {
   const [sizeLabel, setSizeLabel] = useState("");
   const [color, setColor] = useState("");
   const [qty, setQty] = useState(1);
-  const [zoom, setZoom] = useState(false);
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
   const [reviewError, setReviewError] = useState<string | null>(null);
@@ -78,7 +77,6 @@ export default function ProductDetail() {
     setSizeLabel(getSizeLabel(product, firstSize, "standard"));
     setColor(product.colors[0]?.name ?? "");
     setQty(1);
-    setZoom(false);
   }, [product?.id]);
 
   if (!product) {
@@ -191,41 +189,7 @@ export default function ProductDetail() {
       <section className="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2 lg:gap-14">
           <div>
-            <div className="relative border border-ink/10 bg-card p-2.5">
-              <div className="relative aspect-[4/5] overflow-hidden">
-                <ProductVisual
-                  product={product}
-                  className="h-full w-full"
-                  imageClassName={cn(
-                    "transition-transform duration-700 ease-out",
-                    zoom && "scale-[1.6]",
-                  )}
-                  plateClassName={cn(
-                    "p-8 transition-transform duration-700 ease-out",
-                    zoom && "scale-[1.6]",
-                  )}
-                  eager
-                >
-                  <span className="mono absolute top-4 start-4 z-10 bg-black/55 px-2 py-1 text-[7px] tracking-[0.18em] text-white/80 backdrop-blur">
-                    ZOMA EDIT / {product.kind.toUpperCase()}
-                  </span>
-                  {product.discount > 0 && (
-                    <span className="shimmer-sweep mono absolute top-4 end-4 z-10 border border-gold/40 bg-black/55 px-2 py-1 text-[9px] text-gold backdrop-blur">
-                      -{product.discount}%
-                    </span>
-                  )}
-                </ProductVisual>
-                <button
-                  type="button"
-                  onClick={() => setZoom((current) => !current)}
-                  className="absolute bottom-3 end-3 z-10 flex items-center gap-1.5 border border-white/25 bg-black/55 px-2.5 py-1.5 text-[9px] text-white backdrop-blur transition-colors hover:bg-gold hover:text-espresso"
-                >
-                  <Maximize2 className="size-3" />
-                  {zoom ? "تصغير" : "تكبير"}
-                </button>
-
-              </div>
-            </div>
+            <ProductGallery product={product} />
 
             <div className="mt-3 grid grid-cols-3 gap-2">
               {[

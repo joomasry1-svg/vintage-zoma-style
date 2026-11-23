@@ -70,6 +70,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       keywords: doc.keywords,
       imageUrl: doc.imageUrl,
       secondImageUrl: doc.secondImageUrl,
+      gallery: doc.gallery,
+      videoPlaybackId: doc.videoPlaybackId,
+      videoAssetId: doc.videoAssetId,
+      videoAspectRatio: doc.videoAspectRatio,
+      videoDuration: doc.videoDuration,
+      sizeOverrides: doc.sizeOverrides,
       ownerNote: doc.ownerNote,
     }));
   }, [productsQuery, storeIsSeeded]);

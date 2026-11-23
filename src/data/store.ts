@@ -73,6 +73,11 @@ export type GarmentKind =
 
 export type ProductColor = { name: string; hex: string };
 
+export type ProductSizeOverride = {
+  size: string;
+  values: Record<string, string>;
+};
+
 export type Product = {
   id: string;
   name: string;
@@ -90,6 +95,12 @@ export type Product = {
   keywords: string[];
   imageUrl?: string;
   secondImageUrl?: string;
+  gallery?: string[];
+  videoPlaybackId?: string;
+  videoAssetId?: string;
+  videoAspectRatio?: string;
+  videoDuration?: number;
+  sizeOverrides?: ProductSizeOverride[];
   ownerNote?: string;
 };
 

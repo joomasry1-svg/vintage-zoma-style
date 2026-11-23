@@ -40,7 +40,7 @@ export type SizeDetails = {
   widthLabel: string;
   lengthLabel: string;
   heightLabel: string;
-  summary: { label: string; value: string }[];
+  summary: { key: string; label: string; value: string }[];
   garment: { key: GarmentKey; label: string; value: string }[];
   note: string;
   fitNote: string;
@@ -326,7 +326,7 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
   const bodyTop = BODY_TOPS[standardSize] ?? BODY_TOPS.M;
   const bodyBottom = BODY_BOTTOMS[standardSize] ?? BODY_BOTTOMS.M;
 
-  let summary: { label: string; value: string }[] = [];
+  let summary: { key: string; label: string; value: string }[] = [];
   let garment: { key: GarmentKey; label: string; value: string }[] = [];
   let height = row.height;
   let fitNote = "قياسات مرجعية بالسنتمتر قبل تأكيد الطلب.";
@@ -334,9 +334,9 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
   if (profile === "top") {
     height = bodyTop.height;
     summary = [
-      { label: "الصدر", value: `${bodyTop.bust} سم` },
-      { label: "الخصر", value: `${bodyTop.waist} سم` },
-      { label: "الطول", value: `${bodyTop.height} سم` },
+      { key: "body_bust", label: "الصدر", value: `${bodyTop.bust} سم` },
+      { key: "body_waist", label: "الخصر", value: `${bodyTop.waist} سم` },
+      { key: "body_height", label: "الطول", value: `${bodyTop.height} سم` },
     ];
     garment = [
       {
@@ -364,9 +364,9 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
   } else if (profile === "bottom") {
     height = bodyBottom.height;
     summary = [
-      { label: "الخصر", value: `${bodyBottom.waist} سم` },
-      { label: "الأرداف", value: `${bodyBottom.hip} سم` },
-      { label: "الطول", value: `${bodyBottom.height} سم` },
+      { key: "body_waist", label: "الخصر", value: `${bodyBottom.waist} سم` },
+      { key: "body_hip", label: "الأرداف", value: `${bodyBottom.hip} سم` },
+      { key: "body_height", label: "الطول", value: `${bodyBottom.height} سم` },
     ];
     garment = [
       {
@@ -393,9 +393,17 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
     fitNote = "٧٢٪ من العملاء يقولون إن هذا المقاس مطابق لجدول القياسات.";
   } else if (profile === "shoes") {
     summary = [
-      { label: "طول القدم", value: `${formatNumber(row.length)} سم` },
-      { label: "عرض القدم", value: `${formatNumber(row.width)} سم` },
-      { label: "ارتفاع الكعب", value: `${row.height} سم` },
+      {
+        key: "foot_length",
+        label: "طول القدم",
+        value: `${formatNumber(row.length)} سم`,
+      },
+      {
+        key: "foot_width",
+        label: "عرض القدم",
+        value: `${formatNumber(row.width)} سم`,
+      },
+      { key: "foot_height", label: "ارتفاع الكعب", value: `${row.height} سم` },
     ];
     garment = [
       {
@@ -413,9 +421,17 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
     fitNote = "قارن طول قدمك قبل الطلب؛ المقاس الأوروبي مذكور على النعل.";
   } else {
     summary = [
-      { label: "الطول", value: `${formatNumber(row.length)} سم` },
-      { label: "العرض", value: `${formatNumber(row.width)} سم` },
-      { label: "الارتفاع", value: `${row.height} سم` },
+      {
+        key: "item_length",
+        label: "الطول",
+        value: `${formatNumber(row.length)} سم`,
+      },
+      {
+        key: "item_width",
+        label: "العرض",
+        value: `${formatNumber(row.width)} سم`,
+      },
+      { key: "item_height", label: "الارتفاع", value: `${row.height} سم` },
     ];
     garment = [
       {
@@ -430,6 +446,24 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
       },
       { key: "heel", label: "الارتفاع", value: row.height },
     ];
+  }
+
+  const overrides =
+    product.sizeOverrides?.find((entry) => entry.size === size)?.values ?? {};
+  const custom = (key: string) => overrides[key]?.trim() ?? "";
+
+  summary = summary.map((metric) => {
+    const value = custom(metric.key);
+    return value ? { ...metric, value: withUnit(value) } : metric;
+  });
+  garment = garment.map((metric) => {
+    const value = custom(metric.key);
+    return value ? { ...metric, value: stripUnit(value) } : metric;
+  });
+  if (custom("body_height") || custom("item_height") || custom("foot_height")) {
+    height = stripUnit(
+      custom("body_height") || custom("item_height") || custom("foot_height"),
+    );
   }
 
   return {
@@ -451,4 +485,16 @@ export function getSizeDetails(product: Product, size: string): SizeDetails {
 
 function formatNumber(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+export function stripUnit(value: string) {
+  return value
+    .replace(/\s*(سم|cm)\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function withUnit(value: string) {
+  const clean = stripUnit(value);
+  return clean ? `${clean} سم` : clean;
 }

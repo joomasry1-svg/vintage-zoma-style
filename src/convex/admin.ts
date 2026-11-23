@@ -255,17 +255,38 @@ export const saveProduct = mutation({
   handler: async (ctx, args) => {
     await assertAdmin(ctx, args.token);
 
+    const sizes = args.product.sizes
+      .map((size) => size.trim())
+      .filter(Boolean);
     const product = {
       ...args.product,
       price: Math.max(1, Math.round(args.product.price)),
       discount: Math.min(95, Math.max(0, Math.round(args.product.discount))),
-      sizes: args.product.sizes.map((size) => size.trim()).filter(Boolean),
+      sizes,
       colors: args.product.colors
         .map((color) => ({ ...color, name: color.name.trim() }))
         .filter((color) => color.name),
       keywords: args.product.keywords
         .map((keyword) => keyword.trim())
         .filter(Boolean),
+      gallery: (args.product.gallery ?? [])
+        .map((image) => image.trim())
+        .filter(Boolean)
+        .slice(0, 8),
+      videoPlaybackId: args.product.videoPlaybackId?.trim() || undefined,
+      videoAssetId: args.product.videoAssetId?.trim() || undefined,
+      videoAspectRatio: args.product.videoAspectRatio?.trim() || undefined,
+      sizeOverrides: (args.product.sizeOverrides ?? [])
+        .filter((entry) => sizes.includes(entry.size))
+        .map((entry) => ({
+          size: entry.size,
+          values: Object.fromEntries(
+            Object.entries(entry.values)
+              .map(([key, value]) => [key, value.trim()] as const)
+              .filter(([, value]) => Boolean(value)),
+          ),
+        }))
+        .filter((entry) => Object.keys(entry.values).length > 0),
     };
 
     if (product.sizes.length === 0) {
@@ -437,6 +458,17 @@ export const deleteCategory = mutation({
 });
 
 /* --------------------------------- Media ----------------------------------- */
+
+export const verifyAdminToken = query({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("adminSessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .first();
+    return Boolean(session && session.expiresAt > Date.now());
+  },
+});
 
 export const generateMediaUploadUrl = mutation({
   args: { token: v.string() },
