@@ -1,11 +1,9 @@
-import { useMemo, useRef, useState } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useMemo, useState } from "react";
 import {
   Info,
   Maximize2,
   Ruler,
   ScanLine,
-  Sparkles,
 } from "lucide-react";
 import type { Product } from "@/data/store";
 import {
@@ -92,7 +90,7 @@ export function ProductSizePicker({
               aria-pressed={selected}
               title={
                 selected
-                  ? "اضغط مرة أخرى لعرض المجسم ثلاثي الأبعاد"
+                  ? "اضغط مرة أخرى لعرض تفاصيل القياسات"
                   : `اختر مقاس ${labelFor(choice, system)}`
               }
               className={cn(
@@ -131,7 +129,7 @@ export function ProductSizePicker({
         className="mt-2 flex w-full items-center justify-center gap-1.5 text-[8.5px] text-ink-soft/40 transition-colors hover:text-gold lg:justify-start"
       >
         <ScanLine className="size-3" />
-        اضغط على المقاس المحدد مرة أخرى لعرض المجسم ثلاثي الأبعاد
+        اضغط على المقاس المحدد مرة أخرى لعرض تفاصيل القياسات
       </button>
 
       <SizeDetailsDialog
@@ -207,7 +205,6 @@ function SizeDetailsDialog({
 }) {
   const active =
     choices.find((choice) => choice.value === value) ?? choices[0];
-  const isBody = details.profile === "top" || details.profile === "bottom";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -216,10 +213,10 @@ function SizeDetailsDialog({
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="mono text-[8px] tracking-[0.2em] text-gold">
-                3D SIZE LAB / {product.kind.toUpperCase()}
+                SIZE LAB / {product.kind.toUpperCase()}
               </p>
               <DialogTitle className="mt-1.5 text-xl text-ink sm:text-2xl">
-                مجسم القياس التفصيلي
+                تفاصيل القياسات
               </DialogTitle>
               <DialogDescription className="mt-1 text-[10px] text-ink-soft/55">
                 {product.name} — قياسات الجسم والقطعة بالسنتيمتر.
@@ -283,36 +280,8 @@ function SizeDetailsDialog({
             </div>
           </div>
 
-          <div
-            className={cn(
-              "mt-4 grid gap-3",
-              isBody && "lg:grid-cols-[1.05fr_0.95fr]",
-            )}
-          >
-            {isBody && (
-              <div className="relative overflow-hidden border border-ink/10 bg-paper-deep/35 p-3">
-                <div className="flex items-center justify-between">
-                  <p className="mono text-[8px] tracking-[0.16em] text-gold">
-                    BODY SCAN
-                  </p>
-                  <span className="mono flex items-center gap-1 text-[7.5px] text-ink-soft/40">
-                    <Sparkles className="size-2.5 text-gold" /> 3D
-                  </span>
-                </div>
-                <Mannequin3D details={details} />
-                <p className="mt-1 text-center text-[8px] text-ink-soft/35">
-                  حرّك المؤشر فوق المجسم لتدويره
-                </p>
-              </div>
-            )}
-
-            <div
-              className={cn(
-                "border border-ink/10 bg-card p-3",
-                !isBody && "mx-auto w-full max-w-2xl",
-              )}
-            >
-              <div className="flex items-center justify-between">
+          <div className="mx-auto mt-4 w-full max-w-3xl border border-ink/10 bg-card p-3">
+            <div className="flex items-center justify-between">
                 <p className="mono text-[8px] tracking-[0.16em] text-gold">
                   GARMENT FLAT
                 </p>
@@ -336,7 +305,6 @@ function SizeDetailsDialog({
                     </span>
                   </div>
                 ))}
-              </div>
             </div>
           </div>
 
@@ -368,320 +336,6 @@ function SizeDetailsDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Mannequin3D({ details }: { details: SizeDetails }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const rotateY = useMotionValue(0);
-  const rotateX = useMotionValue(0);
-  const springY = useSpring(rotateY, {
-    stiffness: 120,
-    damping: 18,
-    mass: 0.35,
-  });
-  const springX = useSpring(rotateX, {
-    stiffness: 120,
-    damping: 18,
-    mass: 0.35,
-  });
-  const isBottom = details.profile === "bottom";
-  const first = details.summary[0];
-  const second = details.summary[1];
-  const height = details.summary[2];
-
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    const bounds = ref.current?.getBoundingClientRect();
-    if (!bounds) return;
-    const x = (event.clientX - bounds.left) / bounds.width;
-    const y = (event.clientY - bounds.top) / bounds.height;
-    rotateY.set((x - 0.5) * 24);
-    rotateX.set((0.5 - y) * 9);
-  };
-
-  return (
-    <div
-      ref={ref}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={() => {
-        rotateY.set(0);
-        rotateX.set(0);
-      }}
-      className="relative mt-1 flex min-h-[340px] touch-pan-y items-center justify-center overflow-hidden [perspective:1100px]"
-      aria-label={`مجسم ثلاثي الأبعاد لقياسات المقاس ${details.standardSize}`}
-    >
-      <div className="absolute bottom-7 h-10 w-3/5 rounded-[50%] bg-ink/15 blur-2xl" />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_45%_at_50%_35%,color-mix(in_srgb,var(--gold)_8%,transparent),transparent_70%)]"
-      />
-      <motion.div
-        style={{
-          rotateY: springY,
-          rotateX: springX,
-          transformStyle: "preserve-3d",
-          willChange: "transform",
-        }}
-        className="relative w-full max-w-[330px]"
-      >
-        <svg viewBox="0 0 360 430" className="h-auto w-full" role="img">
-          <defs>
-            <linearGradient id="fit-body" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor="#a98b76" />
-              <stop offset="0.16" stopColor="#d6bfad" />
-              <stop offset="0.4" stopColor="#f5e9dd" />
-              <stop offset="0.64" stopColor="#e7d2c1" />
-              <stop offset="0.84" stopColor="#c5a58e" />
-              <stop offset="1" stopColor="#9e806b" />
-            </linearGradient>
-            <linearGradient id="fit-body-light" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor="#fff8f1" stopOpacity="0.35" />
-              <stop offset="0.5" stopColor="#fff8f1" stopOpacity="0.12" />
-              <stop offset="1" stopColor="#6d4e3d" stopOpacity="0.2" />
-            </linearGradient>
-            <pattern
-              id="fit-grid"
-              width="24"
-              height="24"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 24 0 L 0 0 0 24"
-                fill="none"
-                style={{ stroke: "var(--ink)", strokeOpacity: 0.055 }}
-                strokeWidth="0.7"
-              />
-            </pattern>
-          </defs>
-
-          <rect width="360" height="430" fill="url(#fit-grid)" />
-
-          <ellipse
-            cx="178"
-            cy="398"
-            rx="78"
-            ry="13"
-            style={{ fill: "var(--ink)", fillOpacity: 0.09 }}
-          />
-
-          {/* Head, neck and torso */}
-          <g style={{ stroke: "var(--ink)", strokeOpacity: 0.28 }}>
-            <ellipse
-              cx="178"
-              cy="71"
-              rx="25"
-              ry="31"
-              fill="url(#fit-body)"
-              strokeWidth="1.1"
-            />
-            <path
-              d="M160 100 L156 124 Q178 137 200 124 L196 100 Z"
-              fill="url(#fit-body)"
-              strokeWidth="1.1"
-            />
-            <path
-              d="M150 110 C135 117 125 129 120 147 L114 250 C113 269 123 282 138 288 L146 346 L198 346 L207 288 C222 282 232 269 231 250 L225 147 C220 129 210 117 195 110 C181 119 164 119 150 110 Z"
-              fill="url(#fit-body)"
-              strokeWidth="1.2"
-            />
-            <path
-              d="M130 143 C115 166 109 202 113 242 L119 306 C120 314 130 314 130 306 L128 246 L136 158 Z"
-              fill="url(#fit-body)"
-              strokeWidth="1.1"
-            />
-            <path
-              d="M220 143 C235 166 241 202 237 242 L231 306 C230 314 220 314 220 306 L222 246 L214 158 Z"
-              fill="url(#fit-body)"
-              strokeWidth="1.1"
-            />
-            <path
-              d="M146 342 L139 419 C139 423 155 423 156 419 L168 355 L188 355 L200 419 C201 423 217 423 217 419 L210 342 Z"
-              fill="url(#fit-body)"
-              strokeWidth="1.1"
-            />
-            <path
-              d="M150 111 C163 121 181 126 207 118 C208 144 209 178 207 204 C193 213 162 214 149 204 C147 178 147 144 150 111 Z"
-              fill="url(#fit-body-light)"
-              stroke="none"
-            />
-            <path
-              d="M150 111 C134 118 124 130 120 148 L114 250 C113 269 124 282 138 288"
-              fill="none"
-              stroke="#7f6250"
-              strokeOpacity="0.35"
-              strokeWidth="1.4"
-            />
-            <path
-              d="M146 346 C151 360 151 385 139 419 M210 346 C205 366 199 389 200 419"
-              fill="none"
-              stroke="var(--ink)"
-              strokeOpacity="0.2"
-              strokeWidth="1"
-            />
-            <path
-              d="M154 300 Q178 310 202 300"
-              fill="none"
-              style={{ stroke: "var(--ink)", strokeOpacity: 0.15 }}
-              strokeWidth="0.9"
-            />
-          </g>
-
-          {/* Chest / waist or waist / hip measurement rings */}
-          <g style={{ stroke: "var(--gold)" }}>
-            <ellipse
-              cx="178"
-              cy={isBottom ? 230 : 194}
-              rx={isBottom ? 55 : 63}
-              ry="16"
-              fill="none"
-              strokeWidth="1.8"
-            />
-            <ellipse
-              cx="178"
-              cy={isBottom ? 275 : 257}
-              rx={isBottom ? 48 : 50}
-              ry="13"
-              fill="none"
-              strokeWidth="1.8"
-            />
-          </g>
-
-          <MeasureBubble
-            x={6}
-            y={isBottom ? 215 : 179}
-            label={isBottom ? "WAIST" : "BUST"}
-            value={first?.value ?? ""}
-            lineToX={isBottom ? 123 : 115}
-            lineToY={isBottom ? 230 : 194}
-          />
-          <MeasureBubble
-            x={6}
-            y={isBottom ? 264 : 246}
-            label={isBottom ? "HIP" : "WAIST"}
-            value={second?.value ?? ""}
-            lineToX={isBottom ? 130 : 128}
-            lineToY={isBottom ? 275 : 257}
-          />
-
-          {/* Height scale */}
-          <g style={{ stroke: "var(--gold)", strokeOpacity: 0.8 }}>
-            <line x1="322" y1="57" x2="322" y2="356" strokeWidth="1" />
-            {[57, 100, 143, 186, 229, 272, 315, 356].map((y) => (
-              <line
-                key={y}
-                x1="318"
-                y1={y}
-                x2="326"
-                y2={y}
-                strokeWidth="1"
-              />
-            ))}
-          </g>
-          <text
-            x="322"
-            y="44"
-            textAnchor="middle"
-            fontSize="6.5"
-            letterSpacing="1.2"
-            fontFamily="IBM Plex Mono, monospace"
-            style={{ fill: "var(--gold)" }}
-          >
-            HEIGHT
-          </text>
-          <MeasureBubble
-            x={237}
-            y={370}
-            label="HEIGHT"
-            value={height?.value ?? ""}
-            lineToX={322}
-            lineToY={356}
-          />
-
-          <text
-            x="178"
-            y="424"
-            textAnchor="middle"
-            fontSize="6.5"
-            letterSpacing="1.5"
-            fontFamily="IBM Plex Mono, monospace"
-            style={{ fill: "var(--ink-soft)", fillOpacity: 0.4 }}
-          >
-            ZOMA / 3D FIT LAB
-          </text>
-        </svg>
-      </motion.div>
-    </div>
-  );
-}
-
-function MeasureBubble({
-  x,
-  y,
-  label,
-  value,
-  lineToX,
-  lineToY,
-  align = "start",
-}: {
-  x: number;
-  y: number;
-  label: string;
-  value: string;
-  lineToX: number;
-  lineToY: number;
-  align?: "start" | "end";
-}) {
-  const width = 91;
-  const height = 31;
-  const rectX = align === "end" ? x - width : x;
-  const centerX = rectX + width / 2;
-
-  return (
-    <g>
-      <line
-        x1={align === "end" ? rectX : rectX + width}
-        y1={y + height / 2}
-        x2={lineToX}
-        y2={lineToY}
-        style={{ stroke: "var(--gold)", strokeOpacity: 0.5 }}
-        strokeWidth="1"
-        strokeDasharray="2 3"
-      />
-      <rect
-        x={rectX}
-        y={y}
-        width={width}
-        height={height}
-        rx="8"
-        style={{
-          fill: "var(--card)",
-          stroke: "var(--gold)",
-          strokeOpacity: 0.35,
-        }}
-        strokeWidth="1"
-      />
-      <text
-        x={centerX}
-        y={y + 11}
-        textAnchor="middle"
-        fontSize="5.7"
-        letterSpacing="0.8"
-        fontFamily="IBM Plex Mono, monospace"
-        style={{ fill: "var(--gold)" }}
-      >
-        {label}
-      </text>
-      <text
-        x={centerX}
-        y={y + 23}
-        textAnchor="middle"
-        fontSize="8"
-        fontFamily="IBM Plex Mono, monospace"
-        style={{ fill: "var(--ink)" }}
-      >
-        {value.replace(" سم", "")}
-      </text>
-    </g>
   );
 }
 
